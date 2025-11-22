@@ -1,0 +1,644 @@
+<?php
+/**
+ * The template for displaying all single still picture editing posts
+ *
+ * @package nppa_bop_theme
+ */
+
+get_header('bopwins'); ?>
+
+<!-- TOP OF STORY POST PAGE -->
+
+
+<main class="wrapper" id="mainContent"><!-- MAIN CONTENT START -->
+    <article class="story-article-post">
+
+      <!-- <div class="s-crumbs">
+          <div class="c-crumbs w-container">
+            <div class="breadcrumbs">
+              <div class="crumbs">
+<?php previous_post_link(); ?>  |  <?php next_post_link(); ?>
+</div>
+            </div>
+          </div>
+        </div> -->
+
+<!-- SECTION HEADLINE DEK START -->
+      <section id="headline-dek" class="stripe-headline-dek">
+        <div class="container-header story-container w-container">
+          <div class="header-div">
+            <!-- <div class="header-section-meta"><?php the_category(','); ?></div> -->
+            <h1 class="page-headline"><?php the_title(''); ?></h1>
+          </div>
+        </div>
+      </section>
+<!-- SECTION HEADLINE DEK END -->
+
+<!-- STILL Picture Editing START -->
+
+
+<?php if ( have_rows( 'first_place_group' ) ) : ?>
+    <?php while ( have_rows( 'first_place_group' ) ) : the_row(); ?>
+
+          <!-- PLACE 1 START -->
+          <div class="s-stillwinners-stills">
+              <div class="c-winner-still w-container">
+
+                <div class="d-place">
+                  <div class="place"><?php the_sub_field( '1_place' ); ?></div>
+                </div>
+
+            <div class="d-image">
+              <?php $one_single_image = get_sub_field( 'one_single_image' ); ?>
+  <?php if ( $one_single_image ) : ?>
+    <img src="<?php echo esc_url( $one_single_image['url'] ); ?>" alt="<?php echo esc_attr( $one_single_image['alt'] ); ?>" />
+  <?php endif; ?>
+
+
+            <?php if( get_sub_field('1_link_1') ): ?>
+            <div class="d-ovpstorylinks">
+              <div class="d-linkblock">
+            <a href="<?php the_sub_field( '1_link_1' ); ?>" class="w-inline-block">
+              <?php echo do_shortcode('[snapshot url="'. get_sub_field('1_link_1') .'" alt="'. get_field('alt') .'" width="960" height="540"]'); ?></a>
+              </div>
+            <?php endif; ?>
+
+            <?php if( get_sub_field('1_link_2') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '1_link_2' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('1_link_2') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+          </div>
+          <?php endif; ?>
+              <?php if( get_sub_field('1_link_3') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '1_link_3' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('1_link_3') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+          </div>
+                <?php endif; ?>
+                    <?php if( get_sub_field('1_link_4') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '1_link_4' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('1_link_4') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+        </div>
+              <?php endif; ?>
+                  <?php if( get_sub_field('1_link_5') ): ?>
+        <div class="d-linkblock">
+        <a href="<?php the_sub_field( '1_link_5' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('6_link_5') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+        </div>
+        </div>
+              <?php endif; ?>
+</div>
+
+            <!-- PLACE 1 GALLERY START -->
+
+
+
+
+
+    <div class="d-image">
+
+
+
+
+    <?php
+    // If at least 1 image is present in the Project Images Gallery field
+    if( $images = get_sub_field('one_gallery') ) {
+    $image_ids = wp_list_pluck( $images, 'id' );
+    // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+    $image_ids_string = implode( ',', $image_ids );
+    echo '<div class="project-images-slider">';
+      soliloquy_dynamic( array(
+        'id' => 'custom-project-images1',
+        'images' => $image_ids_string
+      ) );
+    echo '</div>';
+    }
+    ?>
+
+    </div>
+
+
+
+            <!-- PLACE 1 GALLERY END -->
+
+        <div class="d-byline-caption">
+          <div class="d-byline-item">
+            <div class="d-byline-photog"><span class="photog"><?php the_sub_field( '1_first_name' ); ?>
+             <?php the_sub_field( '1_last_name' ); ?><?php if( get_sub_field('1_last_name') ): ?>/<?php endif; ?></span><span class="publication"><?php the_sub_field( '1_publication' ); ?></span></div>
+          <div class="d-byline-title"><span class="entrytitle"><?php the_sub_field( '1_entry_name' ); ?></span></div>
+          <p class="d-caption"> <?php echo $image['caption']; // image caption ?></p>
+        </div>
+        </div>
+        </div>
+        <?php endwhile; ?>
+        <?php endif; ?>
+
+
+        <!-- PLACE 1 END -->
+
+        <?php if ( have_rows( 'second_place_group' ) ) : ?>
+	<?php while ( have_rows( 'second_place_group' ) ) : the_row(); ?>
+
+        <!-- PLACE 2 START -->
+        <div class="s-stillwinners-stills">
+            <div class="c-winner-still w-container">
+
+              <div class="d-place">
+                <div class="place"><?php the_sub_field( '2_place' ); ?></div>
+              </div>
+
+          <div class="d-image">
+
+              <?php $image = get_sub_field( 'one_single_image' ); ?>
+              <?php if ( $image ) : ?>
+                <img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
+              <?php endif; ?>
+          </div>
+
+          <?php if( get_sub_field('2_link_1') ): ?>
+            <div class="d-ovpstorylinks">
+              <div class="d-linkblock">
+            <a href="<?php the_sub_field( '2_link_1' ); ?>" class="w-inline-block">
+              <?php echo do_shortcode('[snapshot url="'. get_sub_field('2_link_1') .'" alt="'. get_field('alt') .'" width="960" height="540"]'); ?></a>
+              </div>
+            <?php endif; ?>
+
+            <?php if( get_sub_field('2_link_2') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '2_link_2' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('2_link_2') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+          </div>
+          <?php endif; ?>
+              <?php if( get_sub_field('2_link_3') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '2_link_3' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('2_link_3') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+          </div>
+                <?php endif; ?>
+                    <?php if( get_sub_field('2_link_4') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '2_link_4' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('2_link_4') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+        </div>
+              <?php endif; ?>
+                  <?php if( get_sub_field('2_link_5') ): ?>
+        <div class="d-linkblock">
+        <a href="<?php the_sub_field( '2_link_5' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('2_link_5') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+        </div>
+        </div>
+              <?php endif; ?>
+
+          <!-- PLACE 2 GALLERY START -->
+
+
+          <div class="d-image">
+
+
+          <?php
+          // If at least 1 image is present in the Project Images Gallery field
+          if( $images = get_sub_field('one_gallery') ) {
+          $image_ids = wp_list_pluck( $images, 'id' );
+          // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+          $image_ids_string = implode( ',', $image_ids );
+          echo '<div class="project-images-slider">';
+            soliloquy_dynamic( array(
+              'id' => 'custom-project-images2',
+              'images' => $image_ids_string
+            ) );
+          echo '</div>';
+          }
+          ?>
+
+          </div>
+
+
+
+
+          <!-- PLACE 2 GALLERY END -->
+
+      <div class="d-byline-caption">
+        <div class="d-byline-item">
+          <div class="d-byline-photog"><span class="photog"><?php the_sub_field( '2_first_name' ); ?>
+           <?php the_sub_field( '2_last_name' ); ?> </span><span class="publication"><?php the_sub_field( '2_publication' ); ?></span></div>
+        <div class="d-byline-title"><span class="entrytitle"><?php the_sub_field( '2_entry_title' ); ?></span></div>
+        <p class="d-caption"> <?php echo $image['caption']; // image caption ?></p>
+      </div>
+      </div>
+      </div>
+      <?php endwhile; ?>
+      <?php endif; ?>
+
+      <!-- DIGITAL PICTURE EDIT 2 START -->
+
+
+
+      <!-- DIGITAL PICTURE EDIT END -->
+
+      <!-- PLACE 2 END -->
+
+      <?php if ( have_rows( 'third_place_group' ) ) : ?>
+	<?php while ( have_rows( 'third_place_group' ) ) : the_row(); ?>
+
+      <!-- PLACE 3 START -->
+      <div class="s-stillwinners-stills">
+          <div class="c-winner-still w-container">
+
+            <div class="d-place">
+              <div class="place"><?php the_sub_field( '3_place' ); ?></div>
+            </div>
+
+        <div class="d-image">
+
+            <?php $image = get_sub_field( 'three_single_image' ); ?>
+            <?php if ( $image ) : ?>
+              <img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
+            <?php endif; ?>
+
+            <?php if( get_sub_field('3_link_1') ): ?>
+              <div class="d-ovpstorylinks">
+                <div class="d-linkblock">
+              <a href="<?php the_sub_field( '3_link_1' ); ?>" class="w-inline-block">
+                <?php echo do_shortcode('[snapshot url="'. get_sub_field('3_link_1') .'" alt="'. get_field('alt') .'" width="960" height="480"]'); ?></a>
+                </div>
+              <?php endif; ?>
+
+              <?php if( get_sub_field('3_link_2') ): ?>
+            <div class="d-linkblock">
+          <a href="<?php the_sub_field( '3_link_2' ); ?>" class="w-inline-block">
+            <?php echo do_shortcode('[snapshot url="'. get_sub_field('3_link_2') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+            </div>
+            <?php endif; ?>
+                <?php if( get_sub_field('3_link_3') ): ?>
+            <div class="d-linkblock">
+          <a href="<?php the_sub_field( '3_link_3' ); ?>" class="w-inline-block">
+            <?php echo do_shortcode('[snapshot url="'. get_sub_field('3_link_3') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+            </div>
+                  <?php endif; ?>
+                      <?php if( get_sub_field('3_link_4') ): ?>
+            <div class="d-linkblock">
+          <a href="<?php the_sub_field( '3_link_4' ); ?>" class="w-inline-block">
+            <?php echo do_shortcode('[snapshot url="'. get_sub_field('3_link_4') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+          </div>
+                <?php endif; ?>
+                    <?php if( get_sub_field('3_link_5') ): ?>
+          <div class="d-linkblock">
+          <a href="<?php the_sub_field( '3_link_5' ); ?>" class="w-inline-block">
+            <?php echo do_shortcode('[snapshot url="'. get_sub_field('3_link_5') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+          </div>
+          </div>
+                <?php endif; ?>
+
+        </div>
+
+
+
+        <!-- PLACE 3 GALLERY START -->
+
+
+        <div class="d-image">
+
+
+        <?php
+        // If at least 1 image is present in the Project Images Gallery field
+        if( $images = get_sub_field('three_gallery') ) {
+        $image_ids = wp_list_pluck( $images, 'id' );
+        // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+        $image_ids_string = implode( ',', $image_ids );
+        echo '<div class="project-images-slider">';
+          soliloquy_dynamic( array(
+            'id' => 'custom-project-images3',
+            'images' => $image_ids_string
+          ) );
+        echo '</div>';
+        }
+        ?>
+
+        </div>
+        <!-- DIGITAL PICTURE EDIT START -->
+
+
+
+        <!-- DIGITAL PICTURE EDIT END -->
+
+
+
+
+        <!-- PLACE 3 GALLERY END -->
+
+    <div class="d-byline-caption">
+      <div class="d-byline-item">
+        <div class="d-byline-photog"><span class="photog"><?php the_sub_field( '3_first_name' ); ?>
+         <?php the_sub_field( '3_last_name' ); ?><?php if( get_sub_field('3_last_name') ): ?>/<?php endif; ?></span><span class="publication"><?php the_sub_field( '3_publication' ); ?></span></div>
+      <div class="d-byline-title"><span class="entrytitle"><?php the_sub_field( 'entry_name' ); ?></span></div>
+      <p class="d-caption"> <?php echo $image['caption']; // image caption ?></p>
+    </div>
+    </div>
+    </div>
+    <?php endwhile; ?>
+    <?php endif; ?>
+    <!-- PLACE 3 END -->
+
+    <?php if ( have_rows( '4hm_group' ) ) : ?>
+	<?php while ( have_rows( '4hm_group' ) ) : the_row(); ?>
+
+    <!-- PLACE 4 START -->
+    <div class="s-stillwinners-stills">
+        <div class="c-winner-still w-container">
+
+          <div class="d-place">
+            <div class="place"><?php the_sub_field( '4_place' ); ?></div>
+          </div>
+
+      <div class="d-image">
+
+          <?php $image = get_sub_field( 'four_single_image' ); ?>
+          <?php if ( $image ) : ?>
+            <img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
+          <?php endif; ?>
+
+          <?php if( get_sub_field('4_link_1') ): ?>
+            <div class="d-ovpstorylinks">
+              <div class="d-linkblock">
+            <a href="<?php the_sub_field( '4_link_1' ); ?>" class="w-inline-block">
+              <?php echo do_shortcode('[snapshot url="'. get_sub_field('4_link_1') .'" alt="'. get_field('alt') .'" width="960" height="540"]'); ?></a>
+              </div>
+            <?php endif; ?>
+
+            <?php if( get_sub_field('4_link_2') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '4_link_2' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('4_link_2') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+          </div>
+          <?php endif; ?>
+              <?php if( get_sub_field('4_link_3') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '4_link_3' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('4_link_3') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+          </div>
+                <?php endif; ?>
+                    <?php if( get_sub_field('4_link_4') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '4_link_4' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('4_link_4') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+        </div>
+              <?php endif; ?>
+                  <?php if( get_sub_field('4_link_5') ): ?>
+        <div class="d-linkblock">
+        <a href="<?php the_sub_field( '4_link_5' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('4_link_5') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+        </div>
+        </div>
+              <?php endif; ?>
+      </div>
+
+      <!-- PLACE 4 GALLERY START -->
+
+
+      <div class="d-image">
+
+
+      <?php
+      // If at least 1 image is present in the Project Images Gallery field
+      if( $images = get_sub_field('four_gallery') ) {
+      $image_ids = wp_list_pluck( $images, 'id' );
+      // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+      $image_ids_string = implode( ',', $image_ids );
+      echo '<div class="project-images-slider">';
+        soliloquy_dynamic( array(
+          'id' => 'custom-project-images4',
+          'images' => $image_ids_string
+        ) );
+      echo '</div>';
+      }
+      ?>
+
+      </div>
+
+      <!-- DIGITAL PICTURE EDIT START -->
+
+
+
+      <!-- DIGITAL PICTURE EDIT END -->
+
+
+
+      <!-- PLACE 4 GALLERY END -->
+
+  <div class="d-byline-caption">
+    <div class="d-byline-item">
+      <div class="d-byline-photog"><span class="photog"><?php the_sub_field( 'first_name' ); ?>
+       <?php the_sub_field( 'last_name' ); ?><?php if( get_sub_field('last_name') ): ?>/<?php endif; ?></span><span class="publication"><?php the_sub_field( '4_publication' ); ?></span></div>
+    <div class="d-byline-title"><span class="entrytitle"><?php the_sub_field( '4_entry_title' ); ?></span></div>
+    <p class="d-caption"> <?php echo $image['caption']; // image caption ?></p>
+  </div>
+  </div>
+  </div>
+  <?php endwhile; ?>
+  <?php endif; ?>
+  <!-- PLACE 4 END -->
+
+  <?php if ( have_rows( '5hm_group' ) ) : ?>
+	<?php while ( have_rows( '5hm_group' ) ) : the_row(); ?>
+
+  <!-- PLACE 5 START -->
+    <div class="s-stillwinners-stills">
+        <div class="c-winner-still w-container">
+
+          <div class="d-place">
+            <div class="place"><?php the_sub_field( '5_place' ); ?></div>
+          </div>
+      <div class="d-image">
+          <?php $image = get_sub_field( 'five_single_image' ); ?>
+          <?php if ( $image ) : ?>
+            <img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
+          <?php endif; ?>
+
+          <?php if( get_sub_field('5_link_1') ): ?>
+            <div class="d-ovpstorylinks">
+              <div class="d-linkblock">
+            <a href="<?php the_sub_field( '5_link_1' ); ?>" class="w-inline-block">
+              <?php echo do_shortcode('[snapshot url="'. get_sub_field('5_link_1') .'" alt="'. get_field('alt') .'" width="960" height="540"]'); ?></a>
+              </div>
+            <?php endif; ?>
+
+            <?php if( get_sub_field('5_link_2') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '5_link_2' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('5_link_2') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+          </div>
+          <?php endif; ?>
+              <?php if( get_sub_field('5_link_3') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '5_link_3' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('5_link_3') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+          </div>
+                <?php endif; ?>
+                    <?php if( get_sub_field('5_link_4') ): ?>
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '5_link_4' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('5_link_4') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+        </div>
+              <?php endif; ?>
+                  <?php if( get_sub_field('5_link_5') ): ?>
+        <div class="d-linkblock">
+        <a href="<?php the_sub_field( '5_link_5' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('5_link_5') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+        </div>
+        </div>
+              <?php endif; ?>
+      </div>
+
+      <!-- PLACE 5 GALLERY START -->
+
+
+      <div class="d-image">
+
+
+      <?php
+      // If at least 1 image is present in the Project Images Gallery field
+      if( $images = get_sub_field('five_gallery') ) {
+      $image_ids = wp_list_pluck( $images, 'id' );
+      // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+      $image_ids_string = implode( ',', $image_ids );
+      echo '<div class="project-images-slider">';
+        soliloquy_dynamic( array(
+          'id' => 'custom-project-images5',
+          'images' => $image_ids_string
+        ) );
+      echo '</div>';
+      }
+      ?>
+
+      </div>
+
+
+
+
+
+      <!-- PLACE 5 GALLERY END -->
+
+  <div class="d-byline-caption">
+    <div class="d-byline-item">
+      <div class="d-byline-photog"><span class="photog"><?php the_sub_field( '5_first_name' ); ?>
+       <?php the_sub_field( '5_last_name' ); ?><?php if( get_sub_field('5_last_name') ): ?>/<?php endif; ?></span><span class="publication"><?php the_sub_field( '5_publication' ); ?></span></div>
+    <div class="d-byline-title"><span class="entrytitle"><?php the_sub_field( '5_entry_title' ); ?></span></div>
+    <p class="d-caption"><?php echo $image['caption']; // image caption ?></p>
+  </div>
+  </div>
+  </div>
+  <?php endwhile; ?>
+  <?php endif; ?>
+  <!-- PLACE 5 END -->
+
+  <?php if ( have_rows( '6hm_group' ) ) : ?>
+	<?php while ( have_rows( '6hm_group' ) ) : the_row(); ?>
+
+  <!-- PLACE 6 START -->
+<div class="s-stillwinners-stills">
+    <div class="c-winner-still w-container">
+
+      <div class="d-place">
+        <div class="place"><?php the_sub_field( '6_place' ); ?></div>
+      </div>
+
+    <div class="d-image">
+
+      <?php $image = get_sub_field( 'six_single_image' ); ?>
+      <?php if ( $image ) : ?>
+        <img src="<?php echo esc_url( $image['url'] ); ?>" alt="<?php echo esc_attr( $image['alt'] ); ?>" />
+      <?php endif; ?>
+
+      <?php if( get_sub_field('6_link_1') ): ?>
+        <div class="d-ovpstorylinks">
+          <div class="d-linkblock">
+        <a href="<?php the_sub_field( '6_link_1' ); ?>" class="w-inline-block">
+          <?php echo do_shortcode('[snapshot url="'. get_sub_field('6_link_1') .'" alt="'. get_field('alt') .'" width="960" height="540"]'); ?></a>
+          </div>
+        <?php endif; ?>
+
+        <?php if( get_sub_field('6_link_2') ): ?>
+      <div class="d-linkblock">
+    <a href="<?php the_sub_field( '6_link_2' ); ?>" class="w-inline-block">
+      <?php echo do_shortcode('[snapshot url="'. get_sub_field('6_link_2') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+      </div>
+      <?php endif; ?>
+          <?php if( get_sub_field('6_link_3') ): ?>
+      <div class="d-linkblock">
+    <a href="<?php the_sub_field( '6_link_3' ); ?>" class="w-inline-block">
+      <?php echo do_shortcode('[snapshot url="'. get_sub_field('6_link_3') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+      </div>
+            <?php endif; ?>
+                <?php if( get_sub_field('6_link_4') ): ?>
+      <div class="d-linkblock">
+    <a href="<?php the_sub_field( '6_link_4' ); ?>" class="w-inline-block">
+      <?php echo do_shortcode('[snapshot url="'. get_sub_field('6_link_4') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+    </div>
+          <?php endif; ?>
+              <?php if( get_sub_field('6_link_5') ): ?>
+    <div class="d-linkblock">
+    <a href="<?php the_sub_field( '6_link_5' ); ?>" class="w-inline-block">
+      <?php echo do_shortcode('[snapshot url="'. get_sub_field('6_link_5') .'" alt="'. get_field('alt') .'" width="400" height="300"]'); ?></a>
+    </div>
+    </div>
+          <?php endif; ?>
+  </div>
+
+  <!-- PLACE 6 GALLERY START -->
+
+
+  <div class="d-image">
+
+
+  <?php
+  // If at least 1 image is present in the Project Images Gallery field
+  if( $images = get_sub_field('six_gallery') ) {
+  $image_ids = wp_list_pluck( $images, 'id' );
+  // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+  $image_ids_string = implode( ',', $image_ids );
+  echo '<div class="project-images-slider">';
+    soliloquy_dynamic( array(
+      'id' => 'custom-project-images6',
+      'images' => $image_ids_string
+    ) );
+  echo '</div>';
+  }
+  ?>
+
+  </div>
+
+
+
+
+
+
+  <!-- PLACE 6 GALLERY END -->
+
+<div class="d-byline-caption">
+  <div class="d-byline-item">
+    <div class="d-byline-photog"><span class="photog"><?php the_sub_field( '6_first_name' ); ?>
+     <?php the_sub_field( '6_last_name' ); ?><?php if( get_sub_field('6_last_name') ): ?>/<?php endif; ?></span><span class="publication"><?php the_sub_field( '6_publication' ); ?></span></div>
+  <div class="d-byline-title"><span class="entrytitle"><?php the_sub_field( '6_entry_title' ); ?></span></div>
+  <p class="d-caption"> <?php echo $image['caption']; // image caption ?></p>
+</div>
+</div>
+</div>
+<?php endwhile; ?>
+<?php endif; ?>
+<!-- PLACE 6 END -->
+
+
+
+
+
+
+</main><!-- MAIN CONTENT END -->
+
+
+<!-- BOTTOM OF STORY POST PAGE -->
+<?php get_template_part( 'partials/footer/wrapper-footer'); ?>
+
+
+
+<?php get_footer(); ?>

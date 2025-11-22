@@ -1,0 +1,340 @@
+<?php
+/**
+ * The template for displaying all single opvi posts
+ *
+ * @package nppa_bop_theme
+ */
+
+get_header('bopwins'); ?>
+
+
+
+<!-- TOP OF STORY POST PAGE -->
+
+
+<main class="wrapper" id="mainContent"><!-- MAIN CONTENT START -->
+    <article class="story-article-post">
+
+      <!-- <div class="s-crumbs">
+          <div class="c-crumbs w-container">
+            <div class="breadcrumbs">
+              <div class="crumbs">
+<?php previous_post_link(); ?>  |  <?php next_post_link(); ?>
+</div>
+            </div>
+          </div>
+        </div> -->
+
+        <!-- SECTION HEADLINE DEK START -->
+              <section id="headline-dek" class="stripe-headline-dek">
+                <div class="container-header story-container w-container">
+                  <div class="header-div">
+                    <!-- <div class="header-section-meta"><?php the_category(','); ?></div> -->
+                    <h1 class="page-headline"><?php the_title(''); ?></h1>
+                  </div>
+                </div>
+              </section>
+        <!-- SECTION HEADLINE DEK END -->
+
+<!-- First Place Below -->
+
+
+<!-- FIRST PLACE MAIN IMAGE BELOW -->
+
+<div class="s-ovpi-place1">
+    <div class="c-ovpi-gallery w-container">
+        <?php if ( have_rows( 'first_place_group' ) ) : ?>
+            <?php while ( have_rows( 'first_place_group' ) ) : the_row(); ?>
+                
+                <div class="d-place-top">
+                    <?php if (!empty(get_sub_field('place_1'))) : ?>
+                        <div class="place"><?php the_sub_field('place_1'); ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="d-image" style="position: relative;">
+                    <?php 
+                    $main_project_link = get_sub_field('main_project_link'); // Main project link
+                    $one_single_image = get_sub_field('one_single_image'); // ACF Image Field
+                    ?>
+
+                    <?php if (!empty($one_single_image)) : ?>
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            <a href="<?php echo esc_url($main_project_link['url']); ?>" target="_blank">
+                        <?php endif; ?>
+
+                        <img src="<?php echo esc_url($one_single_image['url']); ?>" alt="<?php echo esc_attr($one_single_image['alt']); ?>" 
+                             style="width: 100%; display: block;" />
+
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+    
+   <!-- MAIN PROJECT IMAGE ABOVE -->
+	                
+<style>
+    @media screen and (max-width: 768px) {
+        .d-captionbyline {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            text-align: left !important;
+            width: 100% !important;
+        }
+        .d-byline-title {
+            text-align: left !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            min-height: 1px !important;
+            position: relative !important;
+            z-index: 10 !important;
+            margin-top: 5px !important; /* Added margin */
+        }
+        .nameandorg {
+            display: inline-block !important;
+            width: auto !important;
+            white-space: nowrap !important;
+            visibility: visible !important;
+        }
+    }
+</style>
+
+<div class="d-captionbyline" style="display: flex; flex-direction: column; width: 100%; margin-top: 5px;">
+    <div class="d-byline-title" style="text-align: right; font-weight: bold; display: block; visibility: visible; position: relative; margin-top: 5px;">
+        <div class="nameandorg" style="visibility: visible; display: inline-block;">
+            <?php 
+            $firstname = trim(get_sub_field('firstname_1'));
+            $lastname = trim(get_sub_field('lastname_1'));
+            $publication = trim(get_sub_field('publication_1'));
+
+            if (!empty($firstname)) {
+                echo esc_html($firstname) . ' ';
+            }
+
+            if (!empty($lastname) && !empty($publication)) {
+                echo esc_html($lastname) . '/';
+            } elseif (!empty($lastname)) {
+                echo esc_html($lastname);
+            }
+
+            if (!empty($publication)) {
+                echo esc_html($publication);
+            }
+            ?>
+        </div>
+    </div>
+
+
+
+                    <?php if (!empty(get_sub_field('entry_description'))) : ?>
+                        <div class="d-stillcaption" style="text-align: left; margin-top: 5px;">
+                            <p class="paragraph" style="margin: 0;"><?php the_sub_field('entry_description'); ?></p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+</br>
+                <?php if (!empty(get_sub_field('team_members_1'))) : ?>
+                    <div class="d-teamentry" style="margin-top: 5px;">
+                        <div class="d-byline-teams"><?php the_sub_field('team_members_1'); ?></div>
+                    </div>
+                <?php endif; ?>
+
+            <?php endwhile; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+</br></br></br>
+
+<!-- FIRST PLACE MAIN IMAGE ABOVE -->
+
+<!-- STORYLINKS WITH THUMBNAILS LINKED  -->
+
+<?php if ( have_rows( 'first_place_group' ) ) : ?>
+    <?php while ( have_rows( 'first_place_group' ) ) : the_row(); ?>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: stretch;">
+            <?php 
+            $story_links = [
+                'onep_storylink1' => 'storylink1_image',
+                'onep_storylink2' => 'storylink2_image',
+                'onep_storylink3' => 'storylink3_image',
+                'onep_storylink4' => 'storylink4_image',
+                'onep_storylink5' => 'storylink5_image',
+                'onep_storylink6' => 'storylink6_image',
+                'onep_storylink7' => 'storylink7_image'
+            ];
+
+            foreach ($story_links as $story_link => $story_image) :
+                $link = get_sub_field($story_link);
+                $image = get_sub_field($story_image);
+            ?>
+                <?php if ($image) : ?>
+                    <div style="flex: 1 1 auto; max-width: 300px;">
+                        <?php if ($link) : ?>
+                            <a href="<?php echo esc_url($link['url']); ?>" target="_blank" style="display: block;">
+                        <?php endif; ?>
+                                <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" 
+                                    style="width: 300px; height: 100%; object-fit: cover; display: block;" />
+                        <?php if ($link) : ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+
+    <?php endwhile; ?>
+<?php endif; ?>
+
+<!-- STORYLINKS ABOVE -->
+
+</br></br></br>
+<!-- Youtube Embeds -->
+
+<?php if ( have_rows( 'first_place_group' ) ) : ?>
+    <?php while ( have_rows( 'first_place_group' ) ) : the_row(); ?>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: stretch;">
+            <?php 
+            $video_links = [
+                'onep_videolink_one',
+                'onep_videolink_two',
+                'onep_videolink_three',
+                'onep_videolink_four',
+                'onep_videolink_five'
+            ];
+
+            foreach ($video_links as $video_link) :
+                $video = get_sub_field($video_link);
+                if ($video) :
+            ?>
+                <div style="flex: 1 1 300px; max-width: 100%; height: auto;">
+                    <div class="d-vidlinkblock" style="width: 100%; height: auto; display: flex; flex-direction: column; align-items: center;">
+                        <div class="d-yt-ovpi" style="width: 100%; height: auto;">
+                            <div style="position: relative; width: 100%; padding-top: 56.25%;">
+                                <iframe class="embedly-embed" 
+                                        src="https://www.youtube.com/embed/<?php echo esc_attr($video); ?>?feature=oembed"
+                                        frameborder="0"
+                                        allow="autoplay; fullscreen"
+                                        allowfullscreen
+                                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                                </iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php 
+                endif;
+            endforeach;
+            ?>
+        </div>
+
+    <?php endwhile; ?>
+<?php endif; ?>
+</div></div></div></div></div></div>
+
+
+<!-- First Place Above -->
+
+<!-- Second Place Below -->
+
+<?php if ( have_rows( 'second_place_group' ) ) : ?>
+	<?php while ( have_rows( 'second_place_group' ) ) : the_row(); ?>
+		<?php the_sub_field( 'place_2p' ); ?>
+		<?php $one_single_image = get_sub_field( 'one_single_image' ); ?>
+		<?php if ( $one_single_image ) : ?>
+			<img src="<?php echo esc_url( $one_single_image['url'] ); ?>" alt="<?php echo esc_attr( $one_single_image['alt'] ); ?>" />
+		<?php endif; ?>
+		<?php $main_project_link = get_sub_field( 'main_project_link' ); ?>
+		<?php if ( $main_project_link ) : ?>
+			<a href="<?php echo esc_url( $main_project_link['url'] ); ?>" target="<?php echo esc_attr( $main_project_link['target'] ); ?>"><?php echo esc_html( $main_project_link['title'] ); ?></a>
+		<?php endif; ?>
+		<?php the_sub_field( 'firstname_2p' ); ?>
+		<?php the_sub_field( 'lastname_2p' ); ?>
+		<?php the_sub_field( 'team_members_2p' ); ?>
+		<?php the_sub_field( 'publication_2p' ); ?>
+		<?php the_sub_field( 'entry_title_2p' ); ?>
+		<?php the_sub_field( 'entry_description' ); ?>
+		<?php the_sub_field( 'entry_code_2p' ); ?>
+		<?php $onep_storylink1 = get_sub_field( 'onep_storylink1' ); ?>
+		<?php if ( $onep_storylink1 ) : ?>
+			<a href="<?php echo esc_url( $onep_storylink1['url'] ); ?>" target="<?php echo esc_attr( $onep_storylink1['target'] ); ?>"><?php echo esc_html( $onep_storylink1['title'] ); ?></a>
+		<?php endif; ?>
+		<?php $storylink1_image = get_sub_field( 'storylink1_image' ); ?>
+		<?php if ( $storylink1_image ) : ?>
+			<img src="<?php echo esc_url( $storylink1_image['url'] ); ?>" alt="<?php echo esc_attr( $storylink1_image['alt'] ); ?>" />
+		<?php endif; ?>
+		<?php $twop_storylink2 = get_sub_field( 'twop_storylink2' ); ?>
+		<?php if ( $twop_storylink2 ) : ?>
+			<a href="<?php echo esc_url( $twop_storylink2['url'] ); ?>" target="<?php echo esc_attr( $twop_storylink2['target'] ); ?>"><?php echo esc_html( $twop_storylink2['title'] ); ?></a>
+		<?php endif; ?>
+		<?php $storylink2_image = get_sub_field( 'storylink2_image' ); ?>
+		<?php if ( $storylink2_image ) : ?>
+			<img src="<?php echo esc_url( $storylink2_image['url'] ); ?>" alt="<?php echo esc_attr( $storylink2_image['alt'] ); ?>" />
+		<?php endif; ?>
+		<?php $twop_storylink3 = get_sub_field( 'twop_storylink3' ); ?>
+		<?php if ( $twop_storylink3 ) : ?>
+			<a href="<?php echo esc_url( $twop_storylink3['url'] ); ?>" target="<?php echo esc_attr( $twop_storylink3['target'] ); ?>"><?php echo esc_html( $twop_storylink3['title'] ); ?></a>
+		<?php endif; ?>
+		<?php $storylink3_image = get_sub_field( 'storylink3_image' ); ?>
+		<?php if ( $storylink3_image ) : ?>
+			<img src="<?php echo esc_url( $storylink3_image['url'] ); ?>" alt="<?php echo esc_attr( $storylink3_image['alt'] ); ?>" />
+		<?php endif; ?>
+		<?php $twop_storylink4 = get_sub_field( 'twop_storylink4' ); ?>
+		<?php if ( $twop_storylink4 ) : ?>
+			<a href="<?php echo esc_url( $twop_storylink4['url'] ); ?>" target="<?php echo esc_attr( $twop_storylink4['target'] ); ?>"><?php echo esc_html( $twop_storylink4['title'] ); ?></a>
+		<?php endif; ?>
+		<?php $storylink4_image = get_sub_field( 'storylink4_image' ); ?>
+		<?php if ( $storylink4_image ) : ?>
+			<img src="<?php echo esc_url( $storylink4_image['url'] ); ?>" alt="<?php echo esc_attr( $storylink4_image['alt'] ); ?>" />
+		<?php endif; ?>
+		<?php $twop_storylink5 = get_sub_field( 'twop_storylink5' ); ?>
+		<?php if ( $twop_storylink5 ) : ?>
+			<a href="<?php echo esc_url( $twop_storylink5['url'] ); ?>" target="<?php echo esc_attr( $twop_storylink5['target'] ); ?>"><?php echo esc_html( $twop_storylink5['title'] ); ?></a>
+		<?php endif; ?>
+		<?php $storylink5_image = get_sub_field( 'storylink5_image' ); ?>
+		<?php if ( $storylink5_image ) : ?>
+			<img src="<?php echo esc_url( $storylink5_image['url'] ); ?>" alt="<?php echo esc_attr( $storylink5_image['alt'] ); ?>" />
+		<?php endif; ?>
+		<?php $twop_storylink6 = get_sub_field( 'twop_storylink6' ); ?>
+		<?php if ( $twop_storylink6 ) : ?>
+			<a href="<?php echo esc_url( $twop_storylink6['url'] ); ?>" target="<?php echo esc_attr( $twop_storylink6['target'] ); ?>"><?php echo esc_html( $twop_storylink6['title'] ); ?></a>
+		<?php endif; ?>
+		<?php $storylink6_image = get_sub_field( 'storylink6_image' ); ?>
+		<?php if ( $storylink6_image ) : ?>
+			<img src="<?php echo esc_url( $storylink6_image['url'] ); ?>" alt="<?php echo esc_attr( $storylink6_image['alt'] ); ?>" />
+		<?php endif; ?>
+		<?php $twop_storylink7 = get_sub_field( 'twop_storylink7' ); ?>
+		<?php if ( $twop_storylink7 ) : ?>
+			<a href="<?php echo esc_url( $twop_storylink7['url'] ); ?>" target="<?php echo esc_attr( $twop_storylink7['target'] ); ?>"><?php echo esc_html( $twop_storylink7['title'] ); ?></a>
+		<?php endif; ?>
+		<?php $storylink7_image = get_sub_field( 'storylink7_image' ); ?>
+		<?php if ( $storylink7_image ) : ?>
+			<img src="<?php echo esc_url( $storylink7_image['url'] ); ?>" alt="<?php echo esc_attr( $storylink7_image['alt'] ); ?>" />
+		<?php endif; ?>
+		<?php the_sub_field( 'twop_videolink_one' ); ?>
+		<?php the_sub_field( 'twop_videolink_two' ); ?>
+		<?php the_sub_field( 'twop_videolink_three' ); ?>
+		<?php the_sub_field( 'twop_videolink_four' ); ?>
+		<?php the_sub_field( 'twop_videolink_five' ); ?>
+	<?php endwhile; ?>
+<?php endif; ?>
+
+<!-- Second Place Above --> 
+
+</main><!-- MAIN CONTENT END -->
+
+
+
+
+<!-- BOTTOM OF STORY POST PAGE -->
+<?php get_template_part( 'partials/footer/wrapper-footer'); ?>
+
+
+
+<?php get_footer(); ?>

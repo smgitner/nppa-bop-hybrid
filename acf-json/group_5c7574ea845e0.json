@@ -1,0 +1,51 @@
+{
+    "key": "group_5c7574ea845e0",
+    "title": "Details - MMI",
+    "fields": [
+        {
+            "key": "field_5c7574f096707",
+            "label": "Main Text",
+            "name": "main_text",
+            "type": "wysiwyg",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "tabs": "all",
+            "toolbar": "full",
+            "media_upload": 1,
+            "delay": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "page",
+                "operator": "==",
+                "value": "691"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [
+        "the_content",
+        "discussion",
+        "comments",
+        "format",
+        "send-trackbacks"
+    ],
+    "active": 1,
+    "description": "",
+    "acfcdt_manage_table_definition": 0,
+    "acfcdt_table_definition_file_name": "table_1378x5c7574ea8df19",
+    "modified": 1551297394
+}

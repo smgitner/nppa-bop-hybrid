@@ -1,0 +1,1236 @@
+<?php
+/**
+ * The template for displaying all single picture editing posts - updated in 2025
+ *
+ * @package nppa_bop_theme
+ */
+
+get_header('bopwins'); ?>
+
+
+
+<!-- TOP OF STORY POST PAGE -->
+
+
+<main class="wrapper" id="mainContent"><!-- MAIN CONTENT START -->
+    <article class="story-article-post">
+
+      <!-- <div class="s-crumbs">
+          <div class="c-crumbs w-container">
+            <div class="breadcrumbs">
+              <div class="crumbs">
+<?php //previous_post_link(); ?>  |  <?php //next_post_link(); ?>
+</div>
+            </div>
+          </div>
+        </div> -->
+
+        <!-- SECTION HEADLINE DEK START -->
+              <section id="headline-dek" class="stripe-headline-dek">
+                <div class="container-header story-container w-container">
+                  <div class="header-div">
+                    <!-- <div class="header-section-meta"><?php the_category(','); ?></div> -->
+                    <h1 class="page-headline"><?php the_title(''); ?></h1>
+                  </div>
+                </div>
+              </section>
+        <!-- SECTION HEADLINE DEK END -->
+
+<?php if ( have_rows( 'first_place_group' ) ) : ?>
+    <?php while ( have_rows( 'first_place_group' ) ) : the_row(); ?>
+    
+        <div class="s-ovpi-place1">
+            <div class="c-ovpi-gallery w-container">
+
+                <!-- Top Place Name -->
+                <div class="d-place-top">
+                    <?php if (!empty(get_sub_field('place_1'))) : ?>
+                        <div class="place"><?php the_sub_field('place_1'); ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Main Image with Optional Link -->
+                <div class="d-image" style="position: relative;">
+                    <?php 
+                    $main_project_link = get_sub_field('main_project_link');
+                    $one_single_image = get_sub_field('one_single_image');
+                    ?>
+
+                    <?php if (!empty($one_single_image)) : ?>
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            <a href="<?php echo esc_url($main_project_link['url']); ?>" target="_blank">
+                        <?php endif; ?>
+
+                        <img src="<?php echo esc_url($one_single_image['url']); ?>" alt="<?php echo esc_attr($one_single_image['alt']); ?>" style="width: 100%; display: block;" />
+
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Byline + Description -->
+                <style>
+                    @media screen and (max-width: 768px) {
+                        .d-captionbyline {
+                            display: flex !important;
+                            flex-direction: column !important;
+                            align-items: flex-start !important;
+                            text-align: left !important;
+                            width: 100% !important;
+                        }
+                        .d-byline-title {
+                            text-align: left !important;
+                            display: block !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            height: auto !important;
+                            min-height: 1px !important;
+                            position: relative !important;
+                            z-index: 10 !important;
+                            margin-top: 5px !important;
+                        }
+                        .nameandorg {
+                            display: inline-block !important;
+                            width: auto !important;
+                            white-space: nowrap !important;
+                            visibility: visible !important;
+                        }
+                    }
+                </style>
+
+                <div class="d-captionbyline" style="display: flex; flex-direction: column; width: 100%; margin-top: 5px;">
+                    <div class="d-byline-title" style="text-align: right; font-weight: bold; display: block; visibility: visible; position: relative; margin-top: 5px;">
+                        <div class="nameandorg" style="visibility: visible; display: inline-block;">
+                            <?php 
+                            $firstname = trim(get_sub_field('firstname_1'));
+                            $lastname = trim(get_sub_field('lastname_1'));
+                            $publication = trim(get_sub_field('publication_1'));
+
+                            if (!empty($firstname)) {
+                                echo esc_html($firstname) . ' ';
+                            }
+
+                            if (!empty($lastname) && !empty($publication)) {
+                                echo esc_html($lastname) . '/';
+                            } elseif (!empty($lastname)) {
+                                echo esc_html($lastname);
+                            }
+
+                            if (!empty($publication)) {
+                                echo esc_html($publication);
+                            }
+                            ?>
+                        </div>
+                    </div>
+
+                    <?php if (!empty(get_sub_field('entry_description'))) : ?>
+                        <div class="d-stillcaption" style="text-align: left; margin-top: 5px;">
+                            <p class="paragraph" style="margin: 0;"><?php the_sub_field('entry_description'); ?></p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <?php if (!empty(get_sub_field('team_members_1'))) : ?>
+                    <div class="d-teamentry" style="margin-top: 5px;">
+                        <div class="d-byline-teams"><?php the_sub_field('team_members_1'); ?></div>
+                    </div>
+                <?php endif; ?>
+
+                <br><br><br>
+
+                <!-- Story Links with Thumbnails -->
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: stretch;">
+                    <?php 
+                    $story_links = [
+                        'onep_storylink1' => 'storylink1_image',
+                        'onep_storylink2' => 'storylink2_image',
+                        'onep_storylink3' => 'storylink3_image',
+                        'onep_storylink4' => 'storylink4_image',
+                        'onep_storylink5' => 'storylink5_image',
+                        'onep_storylink6' => 'storylink6_image',
+                        'onep_storylink7' => 'storylink7_image'
+                    ];
+
+                    foreach ($story_links as $story_link => $story_image) :
+                        $link = get_sub_field($story_link);
+                        $image = get_sub_field($story_image);
+                    ?>
+                        <?php if ($image) : ?>
+                            <div style="flex: 1 1 auto; max-width: 300px;">
+                                <?php if ($link) : ?>
+                                    <a href="<?php echo esc_url($link['url']); ?>" target="_blank" style="display: block;">
+                                <?php endif; ?>
+                                        <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" 
+                                            style="width: 300px; height: 100%; object-fit: cover; display: block;" />
+                                <?php if ($link) : ?>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+
+                <br><br><br>
+
+                <!-- Gallery Using Soliloquy -->
+                <div class="d-image">
+                    <?php
+                    if( $images = get_sub_field('one_gallery') ) {
+                        $image_ids = wp_list_pluck( $images, 'id' );
+                        $image_ids_string = implode( ',', $image_ids );
+                        echo '<div class="project-images-slider">';
+                        soliloquy_dynamic( array(
+                            'id' => 'custom-project-images1',
+                            'images' => $image_ids_string
+                        ) );
+                        echo '</div>';
+                    }
+                    ?>
+                </div>
+
+                <!-- Bottom Byline / Caption -->
+                <div class="d-byline-caption">
+                    <div class="d-byline-item">
+                        <div class="d-byline-photog">
+                            <span class="photog"><?php the_sub_field( '1_first_name' ); ?> <?php the_sub_field( '1_last_name' ); ?><?php if( get_sub_field('1_last_name') ): ?>/<?php endif; ?></span>
+                            <span class="publication"><?php the_sub_field( '1_publication' ); ?></span>
+                        </div>
+                        <div class="d-byline-title">
+                            <span class="entrytitle"><?php the_sub_field( '1_entry_name' ); ?></span>
+                        </div>
+                        <p class="d-caption">
+                            <?php echo $image['caption']; ?>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    <?php endwhile; ?>
+<?php endif; ?>        </div></div></div></div></div></div>
+
+
+<!-- First Place Above -->
+
+<!-- Second Place Below -->
+
+<!-- SECOND PLACE MAIN IMAGE BELOW -->
+
+<div class="s-ovpi-place2">
+    <div class="c-ovpi-gallery w-container">
+        <?php if ( have_rows( 'second_place_group' ) ) : ?>
+            <?php while ( have_rows( 'second_place_group' ) ) : the_row(); ?>
+                
+                <div class="d-place-top">
+                    <?php if (!empty(get_sub_field('place_2'))) : ?>
+                        <div class="place"><?php the_sub_field('place_2'); ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="d-image" style="position: relative;">
+                    <?php 
+                    $main_project_link = get_sub_field('main_project_link'); // Main project link
+                    $one_single_image = get_sub_field('one_single_image'); // ACF Image Field
+                    ?>
+
+                    <?php if (!empty($one_single_image)) : ?>
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            <a href="<?php echo esc_url($main_project_link['url']); ?>" target="_blank">
+                        <?php endif; ?>
+
+                        <img src="<?php echo esc_url($one_single_image['url']); ?>" alt="<?php echo esc_attr($one_single_image['alt']); ?>" 
+                             style="width: 100%; display: block;" />
+
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+    
+   <!-- MAIN PROJECT IMAGE ABOVE -->
+	                
+<style>
+    @media screen and (max-width: 768px) {
+        .d-captionbyline {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            text-align: left !important;
+            width: 100% !important;
+        }
+        .d-byline-title {
+            text-align: left !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            min-height: 1px !important;
+            position: relative !important;
+            z-index: 10 !important;
+            margin-top: 5px !important; /* Added margin */
+        }
+        .nameandorg {
+            display: inline-block !important;
+            width: auto !important;
+            white-space: nowrap !important;
+            visibility: visible !important;
+        }
+    }
+</style>
+
+<div class="d-captionbyline" style="display: flex; flex-direction: column; width: 100%; margin-top: 5px;">
+    <div class="d-byline-title" style="text-align: right; font-weight: bold; display: block; visibility: visible; position: relative; margin-top: 5px;">
+        <div class="nameandorg" style="visibility: visible; display: inline-block;">
+            <?php 
+            $firstname = trim(get_sub_field('firstname_2'));
+            $lastname = trim(get_sub_field('lastname_2'));
+            $publication = trim(get_sub_field('publication_2'));
+
+            if (!empty($firstname)) {
+                echo esc_html($firstname) . ' ';
+            }
+
+            if (!empty($lastname) && !empty($publication)) {
+                echo esc_html($lastname) . '/';
+            } elseif (!empty($lastname)) {
+                echo esc_html($lastname);
+            }
+
+            if (!empty($publication)) {
+                echo esc_html($publication);
+            }
+            ?>
+        </div>
+    </div>
+
+
+
+                    <?php if (!empty(get_sub_field('entry_description'))) : ?>
+                        <div class="d-stillcaption" style="text-align: left; margin-top: 5px;">
+                            <p class="paragraph" style="margin: 0;"><?php the_sub_field('entry_description'); ?></p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+</br>
+                <?php if (!empty(get_sub_field('team_members_2'))) : ?>
+                    <div class="d-teamentry" style="margin-top: 5px;">
+                        <div class="d-byline-teams"><?php the_sub_field('team_members_2'); ?></div>
+                    </div>
+                <?php endif; ?>
+
+            <?php endwhile; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+</br></br></br>
+
+<!-- Second PLACE MAIN IMAGE ABOVE -->
+
+
+<!-- STORYLINKS WITH THUMBNAILS LINKED  -->
+
+<?php if ( have_rows( 'second_place_group' ) ) : ?>
+    <?php while ( have_rows( 'second_place_group' ) ) : the_row(); ?>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: stretch;">
+            <?php 
+            $story_links = [
+                'twop_storylink1' => 'storylink1_image',
+                'twop_storylink2' => 'storylink2_image',
+                'twop_storylink3' => 'storylink3_image',
+                'twop_storylink4' => 'storylink4_image',
+                'twop_storylink5' => 'storylink5_image',
+                'twop_storylink6' => 'storylink6_image',
+                'twop_storylink7' => 'storylink7_image'
+            ];
+
+            foreach ($story_links as $story_link => $story_image) :
+                $link = get_sub_field($story_link);
+                $image = get_sub_field($story_image);
+            ?>
+                <?php if ($image) : ?>
+                    <div style="flex: 1 1 auto; max-width: 300px;">
+                        <?php if ($link) : ?>
+                            <a href="<?php echo esc_url($link['url']); ?>" target="_blank" style="display: block;">
+                        <?php endif; ?>
+                                <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" 
+                                    style="width: 300px; height: 100%; object-fit: cover; display: block;" />
+                        <?php if ($link) : ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+
+    <?php endwhile; ?>
+<?php endif; ?>
+
+<!-- STORYLINKS ABOVE -->
+
+</br></br></br>
+ <!-- PLACE 2 GALLERY START -->
+
+
+          <div class="d-image">
+
+
+          <?php
+          // If at least 1 image is present in the Project Images Gallery field
+          if( $images = get_sub_field('two_gallery') ) {
+          $image_ids = wp_list_pluck( $images, 'id' );
+          // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+          $image_ids_string = implode( ',', $image_ids );
+          echo '<div class="project-images-slider">';
+            soliloquy_dynamic( array(
+              'id' => 'custom-project-images2',
+              'images' => $image_ids_string
+            ) );
+          echo '</div>';
+          }
+          ?>
+
+          </div>
+
+
+
+
+          <!-- PLACE 2 GALLERY END -->
+
+      <div class="d-byline-caption">
+        <div class="d-byline-item">
+          <div class="d-byline-photog"><span class="photog"><?php the_sub_field( '2_first_name' ); ?>
+           <?php the_sub_field( '2_last_name' ); ?> </span><span class="publication"><?php the_sub_field( '2_publication' ); ?></span></div>
+        <div class="d-byline-title"><span class="entrytitle"><?php the_sub_field( '2_entry_title' ); ?></span></div>
+        <p class="d-caption"> <?php echo $image['caption']; // image caption ?></p>
+      </div>
+      </div>
+      </div>
+      <?php endwhile; ?>
+      <?php endif; ?>
+
+      <!-- DIGITAL PICTURE EDIT 2 START -->
+</div></div></div></div></div></div>
+<!-- Second Place Above -->
+
+
+<!--THIRD PLACE -->
+
+<!-- Third PLACE MAIN IMAGE BELOW -->
+
+<div class="s-ovpi-place3">
+    <div class="c-ovpi-gallery w-container">
+        <?php if ( have_rows( 'third_place_group' ) ) : ?>
+            <?php while ( have_rows( 'third_place_group' ) ) : the_row(); ?>
+                
+                <div class="d-place-top">
+                    <?php if (!empty(get_sub_field('place_3'))) : ?>
+                        <div class="place"><?php the_sub_field('place_3'); ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="d-image" style="position: relative;">
+                    <?php 
+                    $main_project_link = get_sub_field('main_project_link'); // Main project link
+                    $one_single_image = get_sub_field('one_single_image'); // ACF Image Field
+                    ?>
+
+                    <?php if (!empty($one_single_image)) : ?>
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            <a href="<?php echo esc_url($main_project_link['url']); ?>" target="_blank">
+                        <?php endif; ?>
+
+                        <img src="<?php echo esc_url($one_single_image['url']); ?>" alt="<?php echo esc_attr($one_single_image['alt']); ?>" 
+                             style="width: 100%; display: block;" />
+
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+    
+   <!-- MAIN PROJECT IMAGE ABOVE -->
+	                
+<style>
+    @media screen and (max-width: 768px) {
+        .d-captionbyline {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            text-align: left !important;
+            width: 100% !important;
+        }
+        .d-byline-title {
+            text-align: left !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            min-height: 1px !important;
+            position: relative !important;
+            z-index: 10 !important;
+            margin-top: 5px !important; /* Added margin */
+        }
+        .nameandorg {
+            display: inline-block !important;
+            width: auto !important;
+            white-space: nowrap !important;
+            visibility: visible !important;
+        }
+    }
+</style>
+
+<div class="d-captionbyline" style="display: flex; flex-direction: column; width: 100%; margin-top: 5px;">
+    <div class="d-byline-title" style="text-align: right; font-weight: bold; display: block; visibility: visible; position: relative; margin-top: 5px;">
+        <div class="nameandorg" style="visibility: visible; display: inline-block;">
+            <?php 
+            $firstname = trim(get_sub_field('firstname_3'));
+            $lastname = trim(get_sub_field('lastname_3'));
+            $publication = trim(get_sub_field('publication_3'));
+
+            if (!empty($firstname)) {
+                echo esc_html($firstname) . ' ';
+            }
+
+            if (!empty($lastname) && !empty($publication)) {
+                echo esc_html($lastname) . '/';
+            } elseif (!empty($lastname)) {
+                echo esc_html($lastname);
+            }
+
+            if (!empty($publication)) {
+                echo esc_html($publication);
+            }
+            ?>
+        </div>
+    </div>
+
+
+
+                    <?php if (!empty(get_sub_field('entry_description'))) : ?>
+                        <div class="d-stillcaption" style="text-align: left; margin-top: 5px;">
+                            <p class="paragraph" style="margin: 0;"><?php the_sub_field('entry_description'); ?></p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+</br>
+                <?php if (!empty(get_sub_field('team_members_3'))) : ?>
+                    <div class="d-teamentry" style="margin-top: 5px;">
+                        <div class="d-byline-teams"><?php the_sub_field('team_members_3'); ?></div>
+                    </div>
+                <?php endif; ?>
+
+            <?php endwhile; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+</br></br></br>
+
+<!-- Third PLACE MAIN IMAGE ABOVE -->
+
+<!-- STORYLINKS WITH THUMBNAILS LINKED  -->
+
+<?php if ( have_rows( 'third_place_group' ) ) : ?>
+    <?php while ( have_rows( 'third_place_group' ) ) : the_row(); ?>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: stretch;">
+            <?php 
+            $story_links = [
+                'threep_storylink1' => 'storylink1_image',
+                'threep_storylink2' => 'storylink2_image',
+                'threep_storylink3' => 'storylink3_image',
+                'threep_storylink4' => 'storylink4_image',
+                'threep_storylink5' => 'storylink5_image',
+                'threep_storylink6' => 'storylink6_image',
+                'threep_storylink7' => 'storylink7_image'
+            ];
+
+            foreach ($story_links as $story_link => $story_image) :
+                $link = get_sub_field($story_link);
+                $image = get_sub_field($story_image);
+            ?>
+                <?php if ($image) : ?>
+                    <div style="flex: 1 1 auto; max-width: 300px;">
+                        <?php if ($link) : ?>
+                            <a href="<?php echo esc_url($link['url']); ?>" target="_blank" style="display: block;">
+                        <?php endif; ?>
+                                <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" 
+                                    style="width: 300px; height: 100%; object-fit: cover; display: block;" />
+                        <?php if ($link) : ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+
+    <?php endwhile; ?>
+<?php endif; ?>
+
+<!-- STORYLINKS ABOVE -->
+
+</br></br></br>
+<!-- PLACE 3 GALLERY START -->
+
+
+        <div class="d-image">
+
+
+        <?php
+        // If at least 1 image is present in the Project Images Gallery field
+        if( $images = get_sub_field('three_gallery') ) {
+        $image_ids = wp_list_pluck( $images, 'id' );
+        // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+        $image_ids_string = implode( ',', $image_ids );
+        echo '<div class="project-images-slider">';
+          soliloquy_dynamic( array(
+            'id' => 'custom-project-images3',
+            'images' => $image_ids_string
+          ) );
+        echo '</div>';
+        }
+        ?>
+
+        </div>
+        <!-- DIGITAL PICTURE EDIT START -->
+
+
+
+        <!-- DIGITAL PICTURE EDIT END -->
+
+
+
+
+        <!-- PLACE 3 GALLERY END -->
+
+    <div class="d-byline-caption">
+      <div class="d-byline-item">
+        <div class="d-byline-photog"><span class="photog"><?php the_sub_field( '3_first_name' ); ?>
+         <?php the_sub_field( '3_last_name' ); ?><?php if( get_sub_field('3_last_name') ): ?>/<?php endif; ?></span><span class="publication"><?php the_sub_field( '3_publication' ); ?></span></div>
+      <div class="d-byline-title"><span class="entrytitle"><?php the_sub_field( 'entry_name' ); ?></span></div>
+      <p class="d-caption"> <?php echo $image['caption']; // image caption ?></p>
+    </div>
+    </div>
+    </div>
+    <?php endwhile; ?>
+    <?php endif; ?>
+    <!-- PLACE 3 END -->
+</div></div></div></div></div></div>
+<!-- Third Place Above -->
+
+<!-- HM4 PLACE MAIN IMAGE BELOW -->
+
+<div class="s-ovpi-place4">
+    <div class="c-ovpi-gallery w-container">
+        <?php if ( have_rows( 'hm4_place_group' ) ) : ?>
+            <?php while ( have_rows( 'hm4_place_group' ) ) : the_row(); ?>
+                
+                <div class="d-place-top">
+                    <?php if (!empty(get_sub_field('place_hm4'))) : ?>
+                        <div class="place"><?php the_sub_field('place_hm4'); ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="d-image" style="position: relative;">
+                    <?php 
+                    $main_project_link = get_sub_field('main_project_link'); // Main project link
+                    $one_single_image = get_sub_field('one_single_image'); // ACF Image Field
+                    ?>
+
+                    <?php if (!empty($one_single_image)) : ?>
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            <a href="<?php echo esc_url($main_project_link['url']); ?>" target="_blank">
+                        <?php endif; ?>
+
+                        <img src="<?php echo esc_url($one_single_image['url']); ?>" alt="<?php echo esc_attr($one_single_image['alt']); ?>" 
+                             style="width: 100%; display: block;" />
+
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+    
+   <!-- MAIN PROJECT IMAGE ABOVE -->
+	                
+<style>
+    @media screen and (max-width: 768px) {
+        .d-captionbyline {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            text-align: left !important;
+            width: 100% !important;
+        }
+        .d-byline-title {
+            text-align: left !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            min-height: 1px !important;
+            position: relative !important;
+            z-index: 10 !important;
+            margin-top: 5px !important; /* Added margin */
+        }
+        .nameandorg {
+            display: inline-block !important;
+            width: auto !important;
+            white-space: nowrap !important;
+            visibility: visible !important;
+        }
+    }
+</style>
+
+<div class="d-captionbyline" style="display: flex; flex-direction: column; width: 100%; margin-top: 5px;">
+    <div class="d-byline-title" style="text-align: right; font-weight: bold; display: block; visibility: visible; position: relative; margin-top: 5px;">
+        <div class="nameandorg" style="visibility: visible; display: inline-block;">
+            <?php 
+            $firstname = trim(get_sub_field('firstname_hm4'));
+            $lastname = trim(get_sub_field('lastname_hm4'));
+            $publication = trim(get_sub_field('publication_hm4'));
+
+            if (!empty($firstname)) {
+                echo esc_html($firstname) . ' ';
+            }
+
+            if (!empty($lastname) && !empty($publication)) {
+                echo esc_html($lastname) . '/';
+            } elseif (!empty($lastname)) {
+                echo esc_html($lastname);
+            }
+
+            if (!empty($publication)) {
+                echo esc_html($publication);
+            }
+            ?>
+        </div>
+    </div>
+
+
+
+                    <?php if (!empty(get_sub_field('entry_description'))) : ?>
+                        <div class="d-stillcaption" style="text-align: left; margin-top: 5px;">
+                            <p class="paragraph" style="margin: 0;"><?php the_sub_field('entry_description'); ?></p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+</br>
+                <?php if (!empty(get_sub_field('team_members_hm4'))) : ?>
+                    <div class="d-teamentry" style="margin-top: 5px;">
+                        <div class="d-byline-teams"><?php the_sub_field('team_members_hm4'); ?></div>
+                    </div>
+                <?php endif; ?>
+
+            <?php endwhile; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+</br></br></br>
+
+<!-- HM4 PLACE MAIN IMAGE ABOVE -->
+
+<!-- STORYLINKS WITH THUMBNAILS LINKED  -->
+
+<?php if ( have_rows( 'hm4_place_group' ) ) : ?>
+    <?php while ( have_rows( 'hm4_place_group' ) ) : the_row(); ?>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: stretch;">
+            <?php 
+            $story_links = [
+                'hm4_storylink1' => 'storylink1_image',
+                'hm4_storylink2' => 'storylink2_image',
+                'hm4_storylink3' => 'storylink3_image',
+                'hm4_storylink4' => 'storylink4_image',
+                'hm4_storylink5' => 'storylink5_image',
+                'hm4_storylink6' => 'storylink6_image',
+                'hm4_storylink7' => 'storylink7_image'
+            ];
+
+            foreach ($story_links as $story_link => $story_image) :
+                $link = get_sub_field($story_link);
+                $image = get_sub_field($story_image);
+            ?>
+                <?php if ($image) : ?>
+                    <div style="flex: 1 1 auto; max-width: 300px;">
+                        <?php if ($link) : ?>
+                            <a href="<?php echo esc_url($link['url']); ?>" target="_blank" style="display: block;">
+                        <?php endif; ?>
+                                <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" 
+                                    style="width: 300px; height: 100%; object-fit: cover; display: block;" />
+                        <?php if ($link) : ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+
+    <?php endwhile; ?>
+<?php endif; ?>
+
+<!-- STORYLINKS ABOVE -->
+
+</br></br></br>
+<!-- PLACE 4 GALLERY START -->
+
+
+      <div class="d-image">
+
+
+      <?php
+      // If at least 1 image is present in the Project Images Gallery field
+      if( $images = get_sub_field('four_gallery') ) {
+      $image_ids = wp_list_pluck( $images, 'id' );
+      // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+      $image_ids_string = implode( ',', $image_ids );
+      echo '<div class="project-images-slider">';
+        soliloquy_dynamic( array(
+          'id' => 'custom-project-images4',
+          'images' => $image_ids_string
+        ) );
+      echo '</div>';
+      }
+      ?>
+
+      </div>
+
+      <!-- DIGITAL PICTURE EDIT START -->
+
+
+
+      <!-- DIGITAL PICTURE EDIT END -->
+
+
+
+      <!-- PLACE 4 GALLERY END -->
+
+  <div class="d-byline-caption">
+    <div class="d-byline-item">
+      <div class="d-byline-photog"><span class="photog"><?php the_sub_field( 'first_name' ); ?>
+       <?php the_sub_field( 'last_name' ); ?><?php if( get_sub_field('last_name') ): ?>/<?php endif; ?></span><span class="publication"><?php the_sub_field( '4_publication' ); ?></span></div>
+    <div class="d-byline-title"><span class="entrytitle"><?php the_sub_field( '4_entry_title' ); ?></span></div>
+    <p class="d-caption"> <?php echo $image['caption']; // image caption ?></p>
+  </div>
+  </div>
+  </div>
+  <?php endwhile; ?>
+  <?php endif; ?>
+  <!-- PLACE 4 END -->
+</div></div></div></div></div></div>
+
+
+<!-- HM4 Place Above -->
+
+<!-- hm5 Below -->
+
+<!-- HM5 PLACE MAIN IMAGE BELOW -->
+
+<div class="s-ovpi-place5">
+    <div class="c-ovpi-gallery w-container">
+        <?php if ( have_rows( 'hm5_place_group' ) ) : ?>
+            <?php while ( have_rows( 'hm5_place_group' ) ) : the_row(); ?>
+                
+                <div class="d-place-top">
+                    <?php if (!empty(get_sub_field('place_hm5'))) : ?>
+                        <div class="place"><?php the_sub_field('place_hm5'); ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="d-image" style="position: relative;">
+                    <?php 
+                    $main_project_link = get_sub_field('main_project_link'); // Main project link
+                    $one_single_image = get_sub_field('one_single_image'); // ACF Image Field
+                    ?>
+
+                    <?php if (!empty($one_single_image)) : ?>
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            <a href="<?php echo esc_url($main_project_link['url']); ?>" target="_blank">
+                        <?php endif; ?>
+
+                        <img src="<?php echo esc_url($one_single_image['url']); ?>" alt="<?php echo esc_attr($one_single_image['alt']); ?>" 
+                             style="width: 100%; display: block;" />
+
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+    
+   <!-- MAIN PROJECT IMAGE ABOVE -->
+	                
+<style>
+    @media screen and (max-width: 768px) {
+        .d-captionbyline {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            text-align: left !important;
+            width: 100% !important;
+        }
+        .d-byline-title {
+            text-align: left !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            min-height: 1px !important;
+            position: relative !important;
+            z-index: 10 !important;
+            margin-top: 5px !important; /* Added margin */
+        }
+        .nameandorg {
+            display: inline-block !important;
+            width: auto !important;
+            white-space: nowrap !important;
+            visibility: visible !important;
+        }
+    }
+</style>
+
+<div class="d-captionbyline" style="display: flex; flex-direction: column; width: 100%; margin-top: 5px;">
+    <div class="d-byline-title" style="text-align: right; font-weight: bold; display: block; visibility: visible; position: relative; margin-top: 5px;">
+        <div class="nameandorg" style="visibility: visible; display: inline-block;">
+            <?php 
+            $firstname = trim(get_sub_field('firstname_hm5'));
+            $lastname = trim(get_sub_field('lastname_hm5'));
+            $publication = trim(get_sub_field('publication_hm5'));
+
+            if (!empty($firstname)) {
+                echo esc_html($firstname) . ' ';
+            }
+
+            if (!empty($lastname) && !empty($publication)) {
+                echo esc_html($lastname) . '/';
+            } elseif (!empty($lastname)) {
+                echo esc_html($lastname);
+            }
+
+            if (!empty($publication)) {
+                echo esc_html($publication);
+            }
+            ?>
+        </div>
+    </div>
+
+
+
+                    <?php if (!empty(get_sub_field('entry_description'))) : ?>
+                        <div class="d-stillcaption" style="text-align: left; margin-top: 5px;">
+                            <p class="paragraph" style="margin: 0;"><?php the_sub_field('entry_description'); ?></p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+</br>
+                <?php if (!empty(get_sub_field('team_members_hm5'))) : ?>
+                    <div class="d-teamentry" style="margin-top: 5px;">
+                        <div class="d-byline-teams"><?php the_sub_field('team_members_hm5'); ?></div>
+                    </div>
+                <?php endif; ?>
+
+            <?php endwhile; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+</br></br></br>
+
+<!-- hm5 PLACE MAIN IMAGE ABOVE -->
+
+<!-- STORYLINKS WITH THUMBNAILS LINKED  -->
+
+<?php if ( have_rows( 'hm5_place_group' ) ) : ?>
+    <?php while ( have_rows( 'hm5_place_group' ) ) : the_row(); ?>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: stretch;">
+            <?php 
+            $story_links = [
+                'hm5_storylink1' => 'storylink1_image',
+                'hm5_storylink2' => 'storylink2_image',
+                'hm5_storylink3' => 'storylink3_image',
+                'hm5_storylink4' => 'storylink4_image',
+                'hm5_storylink5' => 'storylink5_image',
+                'hm5_storylink6' => 'storylink6_image',
+                'hm5_storylink7' => 'storylink7_image'
+            ];
+
+            foreach ($story_links as $story_link => $story_image) :
+                $link = get_sub_field($story_link);
+                $image = get_sub_field($story_image);
+            ?>
+                <?php if ($image) : ?>
+                    <div style="flex: 1 1 auto; max-width: 300px;">
+                        <?php if ($link) : ?>
+                            <a href="<?php echo esc_url($link['url']); ?>" target="_blank" style="display: block;">
+                        <?php endif; ?>
+                                <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" 
+                                    style="width: 300px; height: 100%; object-fit: cover; display: block;" />
+                        <?php if ($link) : ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+
+    <?php endwhile; ?>
+<?php endif; ?>
+
+<!-- STORYLINKS ABOVE -->
+
+</br></br></br>
+ <!-- PLACE 5 GALLERY START -->
+
+
+      <div class="d-image">
+
+
+      <?php
+      // If at least 1 image is present in the Project Images Gallery field
+      if( $images = get_sub_field('five_gallery') ) {
+      $image_ids = wp_list_pluck( $images, 'id' );
+      // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+      $image_ids_string = implode( ',', $image_ids );
+      echo '<div class="project-images-slider">';
+        soliloquy_dynamic( array(
+          'id' => 'custom-project-images5',
+          'images' => $image_ids_string
+        ) );
+      echo '</div>';
+      }
+      ?>
+
+      </div>
+
+
+
+
+
+      <!-- PLACE 5 GALLERY END -->
+</div></div></div></div></div></div>
+
+
+<!-- hm5 Place Above -->
+
+<!-- hm6 Below -->
+
+<!-- HM6 PLACE MAIN IMAGE BELOW -->
+
+<div class="s-ovpi-place5">
+    <div class="c-ovpi-gallery w-container">
+        <?php if ( have_rows( 'hm6_place_group' ) ) : ?>
+            <?php while ( have_rows( 'hm6_place_group' ) ) : the_row(); ?>
+                
+                <div class="d-place-top">
+                    <?php if (!empty(get_sub_field('place_hm6'))) : ?>
+                        <div class="place"><?php the_sub_field('place_hm6'); ?></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="d-image" style="position: relative;">
+                    <?php 
+                    $main_project_link = get_sub_field('main_project_link'); // Main project link
+                    $one_single_image = get_sub_field('one_single_image'); // ACF Image Field
+                    ?>
+
+                    <?php if (!empty($one_single_image)) : ?>
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            <a href="<?php echo esc_url($main_project_link['url']); ?>" target="_blank">
+                        <?php endif; ?>
+
+                        <img src="<?php echo esc_url($one_single_image['url']); ?>" alt="<?php echo esc_attr($one_single_image['alt']); ?>" 
+                             style="width: 100%; display: block;" />
+
+                        <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+    
+   <!-- MAIN PROJECT IMAGE ABOVE -->
+	                
+<style>
+    @media screen and (max-width: 768px) {
+        .d-captionbyline {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            text-align: left !important;
+            width: 100% !important;
+        }
+        .d-byline-title {
+            text-align: left !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            height: auto !important;
+            min-height: 1px !important;
+            position: relative !important;
+            z-index: 10 !important;
+            margin-top: 5px !important; /* Added margin */
+        }
+        .nameandorg {
+            display: inline-block !important;
+            width: auto !important;
+            white-space: nowrap !important;
+            visibility: visible !important;
+        }
+    }
+</style>
+
+<div class="d-captionbyline" style="display: flex; flex-direction: column; width: 100%; margin-top: 5px;">
+    <div class="d-byline-title" style="text-align: right; font-weight: bold; display: block; visibility: visible; position: relative; margin-top: 5px;">
+        <div class="nameandorg" style="visibility: visible; display: inline-block;">
+            <?php 
+            $firstname = trim(get_sub_field('firstname_hm6'));
+            $lastname = trim(get_sub_field('lastname_hm6'));
+            $publication = trim(get_sub_field('publication_hm6'));
+
+            if (!empty($firstname)) {
+                echo esc_html($firstname) . ' ';
+            }
+
+            if (!empty($lastname) && !empty($publication)) {
+                echo esc_html($lastname) . '/';
+            } elseif (!empty($lastname)) {
+                echo esc_html($lastname);
+            }
+
+            if (!empty($publication)) {
+                echo esc_html($publication);
+            }
+            ?>
+        </div>
+    </div>
+
+
+
+                    <?php if (!empty(get_sub_field('entry_description'))) : ?>
+                        <div class="d-stillcaption" style="text-align: left; margin-top: 5px;">
+                            <p class="paragraph" style="margin: 0;"><?php the_sub_field('entry_description'); ?></p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+</br>
+                <?php if (!empty(get_sub_field('team_members_hm6'))) : ?>
+                    <div class="d-teamentry" style="margin-top: 5px;">
+                        <div class="d-byline-teams"><?php the_sub_field('team_members_hm6'); ?></div>
+                    </div>
+                <?php endif; ?>
+
+            <?php endwhile; ?>
+        <?php endif; ?>
+    </div>
+</div>
+
+</br></br></br>
+
+<!-- hm6 PLACE MAIN IMAGE ABOVE -->
+
+<!-- STORYLINKS WITH THUMBNAILS LINKED  -->
+
+<?php if ( have_rows( 'hm6_place_group' ) ) : ?>
+    <?php while ( have_rows( 'hm6_place_group' ) ) : the_row(); ?>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: stretch;">
+            <?php 
+            $story_links = [
+                'hm6_storylink1' => 'storylink1_image',
+                'hm6_storylink2' => 'storylink2_image',
+                'hm6_storylink3' => 'storylink3_image',
+                'hm6_storylink4' => 'storylink4_image',
+                'hm6_storylink5' => 'storylink5_image',
+                'hm6_storylink6' => 'storylink6_image',
+                'hm6_storylink7' => 'storylink7_image'
+            ];
+
+            foreach ($story_links as $story_link => $story_image) :
+                $link = get_sub_field($story_link);
+                $image = get_sub_field($story_image);
+            ?>
+                <?php if ($image) : ?>
+                    <div style="flex: 1 1 auto; max-width: 300px;">
+                        <?php if ($link) : ?>
+                            <a href="<?php echo esc_url($link['url']); ?>" target="_blank" style="display: block;">
+                        <?php endif; ?>
+                                <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" 
+                                    style="width: 300px; height: 100%; object-fit: cover; display: block;" />
+                        <?php if ($link) : ?>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </div>
+
+    <?php endwhile; ?>
+<?php endif; ?>
+
+<!-- STORYLINKS ABOVE -->
+
+</br></br></br>
+<!-- PLACE 6 GALLERY START -->
+
+
+  <div class="d-image">
+
+
+  <?php
+  // If at least 1 image is present in the Project Images Gallery field
+  if( $images = get_sub_field('six_gallery') ) {
+  $image_ids = wp_list_pluck( $images, 'id' );
+  // Soliloquy Dynamic requires image IDs to be passed as a comma separated list
+  $image_ids_string = implode( ',', $image_ids );
+  echo '<div class="project-images-slider">';
+    soliloquy_dynamic( array(
+      'id' => 'custom-project-images6',
+      'images' => $image_ids_string
+    ) );
+  echo '</div>';
+  }
+  ?>
+
+  </div>
+
+
+
+
+
+
+  <!-- PLACE 6 GALLERY END -->
+
+<div class="d-byline-caption">
+  <div class="d-byline-item">
+    <div class="d-byline-photog"><span class="photog"><?php the_sub_field( '6_first_name' ); ?>
+     <?php the_sub_field( '6_last_name' ); ?><?php if( get_sub_field('6_last_name') ): ?>/<?php endif; ?></span><span class="publication"><?php the_sub_field( '6_publication' ); ?></span></div>
+  <div class="d-byline-title"><span class="entrytitle"><?php the_sub_field( '6_entry_title' ); ?></span></div>
+  <p class="d-caption"> <?php echo $image['caption']; // image caption ?></p>
+</div>
+</div>
+</div>
+<?php endwhile; ?>
+<?php endif; ?>
+<!-- PLACE 6 END -->
+
+</div></div></div></div></div></div>
+
+
+<!-- hm6 Place Above -->
+
+
+</main><!-- MAIN CONTENT END -->
+
+
+
+
+<!-- BOTTOM OF STORY POST PAGE -->
+<?php get_template_part( 'partials/footer/wrapper-footer'); ?>
+
+
+
+<?php get_footer(); ?>

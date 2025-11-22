@@ -1,0 +1,187 @@
+<?php
+/*
+Template Name: Contest Winners Template
+*/
+get_header();
+?>
+
+<!-- Inline styling (adjust as needed) -->
+<style>
+/* Mobile Styles */
+@media screen and (max-width: 768px) {
+    .d-captionbyline {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+        width: 100% !important;
+    }
+    .d-byline-title {
+        text-align: left !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        min-height: 1px !important;
+        position: relative !important;
+        z-index: 10 !important;
+        margin-top: 5px !important;
+    }
+    .nameandorg {
+        display: inline-block !important;
+        width: auto !important;
+        white-space: nowrap !important;
+        visibility: visible !important;
+    }
+}
+</style>
+
+<?php
+/**
+ * Display a contest group.
+ *
+ * @param string $group_name The ACF group name (e.g., 'first_place_group').
+ * @param string $suffix     Suffix to append to field names (e.g., '1', '2p', '3p', 'hm4', etc.).
+ */
+function display_contest_group($group_name, $suffix) {
+    if ( have_rows($group_name) ) :
+        while ( have_rows($group_name) ) : the_row();
+            ?>
+            <div class="contest-group contest-group-<?php echo esc_attr($suffix); ?>">
+                <div class="c-ovpi-gallery w-container">
+                    <!-- Top Place Title -->
+                    <div class="d-place-top">
+                        <?php if (!empty(get_sub_field('place_' . $suffix))) : ?>
+                            <div class="place"><?php the_sub_field('place_' . $suffix); ?></div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Main Image with Optional Link -->
+                    <div class="d-image" style="position: relative;">
+                        <?php 
+                        $main_project_link = get_sub_field('main_project_link');
+                        $one_single_image = get_sub_field('one_single_image');
+                        ?>
+                        <?php if ($one_single_image) : ?>
+                            <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                                <a href="<?php echo esc_url($main_project_link['url']); ?>" target="_blank">
+                            <?php endif; ?>
+                            <img src="<?php echo esc_url($one_single_image['url']); ?>" alt="<?php echo esc_attr($one_single_image['alt']); ?>" style="width: 100%; display: block;" />
+                            <?php if (!empty($main_project_link) && is_array($main_project_link) && isset($main_project_link['url'])) : ?>
+                                </a>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Caption & Byline -->
+                    <div class="d-captionbyline" style="display: flex; flex-direction: column; width: 100%; margin-top: 5px;">
+                        <div class="d-byline-title" style="text-align: right; font-weight: bold; display: block; margin-top: 5px;">
+                            <div class="nameandorg">
+                                <?php 
+                                $firstname = trim(get_sub_field('firstname_' . $suffix));
+                                $lastname  = trim(get_sub_field('lastname_' . $suffix));
+                                $publication = trim(get_sub_field('publication_' . $suffix));
+                                if (!empty($firstname)) { echo esc_html($firstname) . ' '; }
+                                if (!empty($lastname) && !empty($publication)) { echo esc_html($lastname) . '/'; }
+                                elseif (!empty($lastname)) { echo esc_html($lastname); }
+                                if (!empty($publication)) { echo esc_html($publication); }
+                                ?>
+                            </div>
+                        </div>
+                        <?php if (!empty(get_sub_field('entry_description'))) : ?>
+                            <div class="d-stillcaption" style="text-align: left; margin-top: 5px;">
+                                <p class="paragraph" style="margin: 0;"><?php the_sub_field('entry_description'); ?></p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Team Members -->
+                    <?php if (!empty(get_sub_field('team_members_' . $suffix))) : ?>
+                        <div class="d-teamentry" style="margin-top: 5px;">
+                            <div class="d-byline-teams"><?php the_sub_field('team_members_' . $suffix); ?></div>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <br><br><br>
+                    
+                    <!-- Story Links with Thumbnails -->
+                    <div class="storylinks-thumbnails" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: stretch;">
+                        <?php 
+                        $story_links = array(
+                            'onep_storylink1' => 'storylink1_image',
+                            'onep_storylink2' => 'storylink2_image',
+                            'onep_storylink3' => 'storylink3_image',
+                            'onep_storylink4' => 'storylink4_image',
+                            'onep_storylink5' => 'storylink5_image',
+                            'onep_storylink6' => 'storylink6_image',
+                            'onep_storylink7' => 'storylink7_image'
+                        );
+                        foreach ($story_links as $story_link => $story_image) :
+                            $link = get_sub_field($story_link);
+                            $image = get_sub_field($story_image);
+                            if ($image) :
+                        ?>
+                            <div style="flex: 1 1 auto; max-width: 300px;">
+                                <?php if ($link) : ?>
+                                    <a href="<?php echo esc_url($link['url']); ?>" target="_blank" style="display: block;">
+                                <?php endif; ?>
+                                    <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt']); ?>" style="width: 300px; height: 100%; object-fit: cover; display: block;" />
+                                <?php if ($link) : ?>
+                                    </a>
+                                <?php endif; ?>
+                            </div>
+                        <?php 
+                            endif;
+                        endforeach;
+                        ?>
+                    </div>
+                    
+                    <br><br><br>
+                    
+                    <!-- Gallery Using Soliloquy -->
+                    <div class="d-image">
+                        <?php
+                        if ($images = get_sub_field('one_gallery')) {
+                            $image_ids = wp_list_pluck($images, 'id');
+                            $image_ids_string = implode(',', $image_ids);
+                            echo '<div class="project-images-slider">';
+                            soliloquy_dynamic(array(
+                                'id' => 'custom-project-images' . $suffix,
+                                'images' => $image_ids_string
+                            ));
+                            echo '</div>';
+                        }
+                        ?>
+                    </div>
+                    
+                    <!-- Bottom Byline / Caption -->
+                    <div class="d-byline-caption">
+                        <div class="d-byline-item">
+                            <div class="d-byline-photog">
+                                <span class="photog"><?php the_sub_field($suffix . '_first_name'); ?> <?php the_sub_field($suffix . '_last_name'); ?><?php if(get_sub_field($suffix . '_last_name')): ?>/<?php endif; ?></span>
+                                <span class="publication"><?php the_sub_field($suffix . '_publication'); ?></span>
+                            </div>
+                            <div class="d-byline-title">
+                                <span class="entrytitle"><?php the_sub_field($suffix . '_entry_title'); ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php
+        endwhile;
+    endif;
+}
+?>
+
+<div class="container">
+    <h1>Picture Editing Contest Winners</h1>
+    <?php display_contest_group('first_place_group', '1'); ?>
+    <?php display_contest_group('second_place_group', '2p'); ?>
+    <?php display_contest_group('third_place_group', '3p'); ?>
+    <?php display_contest_group('hm4_place_group', 'hm4'); ?>
+    <?php display_contest_group('hm5_place_group', 'hm5'); ?>
+    <?php display_contest_group('hm6_place_group', 'hm6'); ?>
+</div>
+
+<?php get_footer(); ?>

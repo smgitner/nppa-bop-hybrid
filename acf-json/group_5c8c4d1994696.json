@@ -1,0 +1,52 @@
+{
+    "key": "group_5c8c4d1994696",
+    "title": "Mission Statement",
+    "fields": [
+        {
+            "key": "field_5c8c4dc518d28",
+            "label": "Opening Statement",
+            "name": "opener",
+            "type": "wysiwyg",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "tabs": "all",
+            "toolbar": "full",
+            "media_upload": 1,
+            "delay": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "page",
+                "operator": "==",
+                "value": "684"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [
+        "the_content",
+        "excerpt",
+        "slug",
+        "author",
+        "page_attributes",
+        "send-trackbacks"
+    ],
+    "active": 1,
+    "description": "",
+    "acfcdt_manage_table_definition": 0,
+    "acfcdt_table_definition_file_name": "table_1390x5c8c4d19a07f8",
+    "modified": 1552699311
+}

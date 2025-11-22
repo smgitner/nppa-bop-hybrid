@@ -1,0 +1,62 @@
+{
+    "name": "contactform_meta",
+    "relationship": {
+        "type": "post",
+        "post_type": "post"
+    },
+    "primary_key": [
+        "id"
+    ],
+    "keys": [
+        {
+            "name": "post_id",
+            "columns": [
+                "post_id"
+            ],
+            "unique": true
+        }
+    ],
+    "columns": [
+        {
+            "name": "id",
+            "format": "%d",
+            "null": false,
+            "auto_increment": true,
+            "unsigned": true
+        },
+        {
+            "name": "post_id",
+            "format": "%d"
+        },
+        {
+            "name": "name",
+            "map": {
+                "type": "acf_field_name",
+                "identifier": "name"
+            }
+        },
+        {
+            "name": "email",
+            "map": {
+                "type": "acf_field_name",
+                "identifier": "email"
+            }
+        },
+        {
+            "name": "subject",
+            "map": {
+                "type": "acf_field_name",
+                "identifier": "subject"
+            }
+        },
+        {
+            "name": "message",
+            "map": {
+                "type": "acf_field_name",
+                "identifier": "message"
+            }
+        }
+    ],
+    "hash": "6708520fac0390585d01c75bc50c313a",
+    "modified": 1546752338
+}
