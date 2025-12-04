@@ -91,8 +91,11 @@ bop-webflow-theme-2025/
 │   └── customizer.php         # Customizer options
 ├── partials/                   # Template partials
 ├── page-templates/            # Custom page templates
+├── unused_backups_off/        # Backup files (not in use, excluded from git)
 └── ...
 ```
+
+**Note**: The `unused_backups_off/` directory contains backup files and old versions that are no longer used. This directory is excluded from version control to keep the repository clean.
 
 ## Changelog
 
@@ -106,8 +109,10 @@ bop-webflow-theme-2025/
 **Code Organization:**
 - Consolidated all custom functions into `inc/custom.php`
 - Removed unused files (bop-tweaks.php, tweaktesting.php, etc.)
+- Moved all backup files to `unused_backups_off/` directory
 - Improved code organization and maintainability
 - Added comprehensive PHPDoc comments throughout
+- Updated `.gitignore` to exclude backup file patterns
 
 **Features:**
 - Updated for 2025 BOP contest
