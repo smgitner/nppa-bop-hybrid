@@ -20,8 +20,8 @@
 
 
         <!-- <script src="https://cdn.jsdelivr.net/picturefill/2.3.1/picturefill.min.js"></script> -->
-        <!-- <script src="/wp-content/themes/bop-webflow-theme/js/lightgallery-all.min.js"></script> --?
-        <script src="/wp-content/themes/bop-webflow-theme/lib/jquery.mousewheel.min.js"></script>
+        <!-- <script src="<?php echo get_template_directory_uri(); ?>/js/lightgallery-all.min.js"></script> -->
+        <script src="<?php echo get_template_directory_uri(); ?>/lib/jquery.mousewheel.min.js"></script>
 
 
 
