@@ -40,7 +40,20 @@ npm-debug.log
 *copy*
 *_v1*
 *_v2*
+*_v3*
+*_old*
+*_new*
+*_backup*
+*_bak*
 *doesnotwork*
 *nogallery*
+*_test*
+*_temp*
+*_tmp*
+*.orig
+*.save
+*.swp
+*.swo
+*~
 unused_backups_off/
 
