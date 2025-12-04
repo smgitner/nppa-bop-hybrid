@@ -9,9 +9,9 @@ WordPress theme for the 2026 NPPA Best of Photojournalism (BOP) contest.
 - **Author:** SG Media Group
 - **Author URI:** http://sgmediagroup.com
 - **Theme URI:** http://bop.nppa.org
-- **Requires at least:** WordPress 5.0
-- **Tested up to:** WordPress 5.2
-- **Requires PHP:** 7.0+
+- **Requires at least:** WordPress 6.8
+- **Tested up to:** WordPress 6.8
+- **Requires PHP:** 8.2+
 - **License:** GNU General Public License v2 or later
 - **Text Domain:** bop-webflow-theme
 
@@ -66,8 +66,8 @@ All custom functions are thoroughly documented with PHPDoc comments following Wo
 
 ## Requirements
 
-- WordPress 5.0 or higher
-- PHP 7.0 or higher
+- WordPress 6.8 or higher
+- PHP 8.2 or higher
 - Advanced Custom Fields (ACF) plugin
 
 ## Development

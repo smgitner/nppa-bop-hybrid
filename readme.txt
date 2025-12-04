@@ -3,8 +3,9 @@
 Contributors: @sethgitner, SG Media Group
 Tags: custom-background, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
 
-Requires at least: 5.0
-Tested up to: 5.2
+Requires at least: 6.8
+Tested up to: 6.8
+Requires PHP: 8.2
 Stable tag: 1.1.0
 License: GNU General Public License v2 or later
 License URI: LICENSE
