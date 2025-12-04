@@ -2,7 +2,7 @@
 /**
  * The template for displaying all single posts
  *
- * @package nh_webflow_theme
+ * @package bop_theme_2026
  */
 
 get_header(); ?>

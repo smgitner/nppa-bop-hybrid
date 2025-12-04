@@ -1,4 +1,4 @@
-=== bop-webflow-theme ===
+=== BOP Theme 2026 ===
 
 Contributors: @sethgitner, SG Media Group
 Tags: custom-background, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
@@ -9,11 +9,11 @@ Stable tag: 1.1.0
 License: GNU General Public License v2 or later
 License URI: LICENSE
 
-WordPress theme for the 2025 NPPA Best of Photojournalism (BOP) contest.
+WordPress theme for the 2026 NPPA Best of Photojournalism (BOP) contest.
 
 == Description ==
 
-This is the theme for the 2025 NPPA BOP contest, built with Webflow integration and custom functionality for contest entries, winners, and awards. Features include custom post types, awards display, picture editing contest support, video journalism support, and responsive design.
+This is the theme for the 2026 NPPA BOP contest, built with Webflow integration and custom functionality for contest entries, winners, and awards. Features include custom post types, awards display, picture editing contest support, video journalism support, and responsive design.
 
 The theme follows WordPress coding standards and security best practices, with all custom functions consolidated and thoroughly documented.
 
@@ -64,7 +64,7 @@ Code Organization:
 * Improved code organization and structure
 
 Features:
-* Updated for 2025 BOP contest
+* Updated for 2026 BOP contest
 * Webflow integration
 * Custom post types and templates
 * Responsive image helper function

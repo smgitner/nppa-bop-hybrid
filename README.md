@@ -1,10 +1,10 @@
-# 2025 BOP Webflow Theme
+# BOP Theme 2026
 
-WordPress theme for the 2025 NPPA Best of Photojournalism (BOP) contest.
+WordPress theme for the 2026 NPPA Best of Photojournalism (BOP) contest.
 
 ## Theme Information
 
-- **Theme Name:** 2025 BOP Webflow Theme
+- **Theme Name:** BOP Theme 2026
 - **Version:** 1.1.0
 - **Author:** SG Media Group
 - **Author URI:** http://sgmediagroup.com
@@ -17,7 +17,7 @@ WordPress theme for the 2025 NPPA Best of Photojournalism (BOP) contest.
 
 ## Description
 
-This is the theme for the 2025 NPPA BOP contest, built with Webflow integration and custom functionality for contest entries, winners, and awards. The theme follows WordPress coding standards and security best practices.
+This is the theme for the 2026 NPPA BOP contest, built with Webflow integration and custom functionality for contest entries, winners, and awards. The theme follows WordPress coding standards and security best practices.
 
 ## Features
 
@@ -115,7 +115,7 @@ bop-webflow-theme-2025/
 - Updated `.gitignore` to exclude backup file patterns
 
 **Features:**
-- Updated for 2025 BOP contest
+- Updated for 2026 BOP contest
 - Webflow integration
 - Custom post types and templates
 - Responsive image helper function

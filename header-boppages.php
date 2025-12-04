@@ -6,7 +6,7 @@
  *
  * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package nh_webflow_theme
+ * @package bop_theme_2026
  */
 
 ?><!DOCTYPE html>

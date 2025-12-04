@@ -1,7 +1,7 @@
 <?php /**
  * The template for displaying all single judge posts
  *
- * @package bop_webflow_theme
+ * @package bop_theme_2026
  */
 get_header('boppages');?>
 
