@@ -1,55 +1,116 @@
 <?php
 /**
- * bop_theme functions and definitions
+ * BOP Theme Functions and Definitions
+ *
+ * This is the main functions file for the BOP (Best of Photojournalism) WordPress theme.
+ * It sets up theme support, registers features, and includes additional functionality files.
+ *
+ * The functions.php file is automatically loaded by WordPress and is the central place
+ * where theme functionality is defined. This file follows WordPress coding standards
+ * and best practices.
  *
  * @link https://developer.wordpress.org/themes/basics/theme-functions/
- *
  * @package bop_theme
+ * @since 1.0.0
+ * @version 1.1.0
  */
+
+/* ============================================================================
+ * THEME SETUP FUNCTION
+ * ============================================================================
+ * This function registers all theme support features and must run early
+ * in the WordPress loading process (on the 'after_setup_theme' hook).
+ * ============================================================================ */
 
 if ( ! function_exists( 'bop_theme_setup' ) ) :
 	/**
-	 * Sets up theme defaults and registers support for various WordPress features.
+	 * Sets up theme defaults and registers support for various WordPress features
 	 *
-	 * Note that this function is hooked into the after_setup_theme hook, which
-	 * runs before the init hook. The init hook is too late for some features, such
-	 * as indicating support for post thumbnails.
+	 * This function is essential for theme initialization. It must be hooked to
+	 * 'after_setup_theme' which runs before the 'init' hook. Some features like
+	 * post thumbnails must be registered early in the WordPress loading process.
+	 *
+	 * The function_exists check prevents conflicts if this function is defined
+	 * elsewhere (e.g., in a child theme).
+	 *
+	 * Hook: after_setup_theme
+	 * Priority: Default (10)
+	 *
+	 * @since 1.0.0
+	 * @return void
 	 */
 	function bop_theme_setup() {
-		/*
-		 * Make theme available for translation.
-		 * Translations can be filed in the /languages/ directory.
-		 * If you're building a theme based on bop_theme, use a find and replace
-		 * to change 'bop_theme' to the name of your theme in all the template files.
+		/**
+		 * Make theme available for translation
+		 *
+		 * Loads the theme's text domain from the /languages directory.
+		 * This allows the theme to be translated into different languages.
+		 * Translation files should be placed in: /languages/
+		 *
+		 * @param string $domain Text domain identifier (must match style.css)
+		 * @param string $path   Path to language files directory
 		 */
 		load_theme_textdomain( 'bop_theme', get_template_directory() . '/languages' );
 
-		// Add default posts and comments RSS feed links to head.
+		/**
+		 * Add default posts and comments RSS feed links to <head>
+		 *
+		 * Automatically adds RSS feed links in the document head for:
+		 * - Posts feed: /feed/
+		 * - Comments feed: /comments/feed/
+		 *
+		 * This improves SEO and allows users to subscribe to site updates.
+		 */
 		add_theme_support( 'automatic-feed-links' );
 
-		/*
-		 * Let WordPress manage the document title.
-		 * By adding theme support, we declare that this theme does not use a
-		 * hard-coded <title> tag in the document head, and expect WordPress to
-		 * provide it for us.
+		/**
+		 * Let WordPress manage the document <title> tag
+		 *
+		 * By enabling this feature, WordPress will automatically generate
+		 * the <title> tag based on the current page/post. This is better
+		 * than hard-coding titles because it's dynamic and SEO-friendly.
+		 *
+		 * The theme should NOT include a <title> tag in header.php when
+		 * this feature is enabled.
 		 */
 		add_theme_support( 'title-tag' );
 
-		/*
-		 * Enable support for Post Thumbnails on posts and pages.
+		/**
+		 * Enable support for Post Thumbnails (Featured Images)
+		 *
+		 * This allows posts and pages to have a "Featured Image" which can
+		 * be used in theme templates, archives, and social media sharing.
 		 *
 		 * @link https://developer.wordpress.org/themes/functionality/featured-images-post-thumbnails/
 		 */
 		add_theme_support( 'post-thumbnails' );
 
-		// This theme uses wp_nav_menu() in one location.
+		/**
+		 * Register navigation menu locations
+		 *
+		 * Registers menu locations that can be assigned in Appearance > Menus.
+		 * The 'Primary' menu is typically used for the main site navigation.
+		 *
+		 * Additional menus can be registered in /inc/custom.php
+		 *
+		 * @param array $locations Associative array of menu location IDs and descriptions
+		 */
 		register_nav_menus( array(
 			'menu-1' => esc_html__( 'Primary', 'bop_theme' ),
 		) );
 
-		/*
-		 * Switch default core markup for search form, comment form, and comments
-		 * to output valid HTML5.
+		/**
+		 * Switch default core markup to HTML5
+		 *
+		 * Enables HTML5 markup for specific WordPress core elements.
+		 * This provides better semantic HTML and improved accessibility.
+		 *
+		 * Supported elements:
+		 * - search-form: Search form markup
+		 * - comment-form: Comment form markup
+		 * - comment-list: Comment list markup
+		 * - gallery: Image gallery markup
+		 * - caption: Image caption markup
 		 */
 		add_theme_support( 'html5', array(
 			'search-form',
@@ -59,392 +120,252 @@ if ( ! function_exists( 'bop_theme_setup' ) ) :
 			'caption',
 		) );
 
-		// Set up the WordPress core custom background feature.
+		/**
+		 * Set up the WordPress core custom background feature
+		 *
+		 * Allows users to customize the background color or image through
+		 * Appearance > Customize > Background in the WordPress admin.
+		 *
+		 * @param array $args {
+		 *     Background customization arguments.
+		 *
+		 *     @type string $default-color Default background color (hex code).
+		 *     @type string $default-image Default background image URL.
+		 * }
+		 */
 		add_theme_support( 'custom-background', apply_filters( 'bop_theme_custom_background_args', array(
-			'default-color' => 'ffffff',
-			'default-image' => '',
+			'default-color' => 'ffffff', // White background
+			'default-image' => '',       // No default background image
 		) ) );
 
-		// Add theme support for selective refresh for widgets.
+		/**
+		 * Add theme support for selective refresh for widgets
+		 *
+		 * Enables the Customizer to refresh specific widget areas without
+		 * reloading the entire page. This provides a better user experience
+		 * when customizing widgets in Appearance > Customize.
+		 */
 		add_theme_support( 'customize-selective-refresh-widgets' );
 
 		/**
-		 * Add support for core custom logo.
+		 * Add support for core custom logo
+		 *
+		 * Allows users to upload a custom logo through Appearance > Customize > Site Identity.
+		 * The logo can be displayed in the theme header using the_custom_logo().
 		 *
 		 * @link https://codex.wordpress.org/Theme_Logo
+		 *
+		 * @param array $args {
+		 *     Logo customization arguments.
+		 *
+		 *     @type int    $height      Logo height in pixels.
+		 *     @type int    $width       Logo width in pixels.
+		 *     @type bool   $flex-width  Allow flexible width.
+		 *     @type bool   $flex-height Allow flexible height.
+		 * }
 		 */
 		add_theme_support( 'custom-logo', array(
-			'height'      => 250,
-			'width'       => 250,
-			'flex-width'  => true,
-			'flex-height' => true,
+			'height'      => 250,  // Maximum logo height
+			'width'       => 250,  // Maximum logo width
+			'flex-width'  => true, // Allow width to be flexible
+			'flex-height' => true, // Allow height to be flexible
 		) );
 	}
 endif;
+// Hook the theme setup function to run after theme is loaded
 add_action( 'after_setup_theme', 'bop_theme_setup' );
 
-/**
- * Set the content width in pixels, based on the theme's design and stylesheet.
- *
- * Priority 0 to make it available to lower priority callbacks.
- *
- * @global int $content_width
- */
-function bop_theme_content_width() {
-	// This variable is intended to be overruled from themes.
-	// Open WPCS issue: {@link https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/issues/1043}.
-	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
-	$GLOBALS['content_width'] = apply_filters( 'bop_theme_content_width', 640 );
-}
-add_action( 'after_setup_theme', 'bop_theme_content_width', 0 );
+/* ============================================================================
+ * WIDGET AREA REGISTRATION
+ * ============================================================================
+ * Registers sidebar widget areas where users can add widgets through
+ * Appearance > Widgets in the WordPress admin.
+ * ============================================================================ */
 
 /**
- * Register widget area.
+ * Register widget area (sidebar)
+ *
+ * Registers a sidebar widget area that can be populated with widgets
+ * through Appearance > Widgets. Widgets are reusable content blocks
+ * that can be added to sidebars, footers, or other widget areas.
+ *
+ * Hook: widgets_init
+ * Priority: Default (10)
  *
  * @link https://developer.wordpress.org/themes/functionality/sidebars/#registering-a-sidebar
+ * @since 1.0.0
+ * @return void
  */
 function bop_theme_widgets_init() {
 	register_sidebar( array(
-		'name'          => esc_html__( 'Sidebar', 'bop_theme' ),
-		'id'            => 'sidebar-1',
-		'description'   => esc_html__( 'Add widgets here.', 'bop_theme' ),
-		'before_widget' => '<section id="%1$s" class="widget %2$s">',
-		'after_widget'  => '</section>',
-		'before_title'  => '<h2 class="widget-title">',
-		'after_title'   => '</h2>',
+		'name'          => esc_html__( 'Sidebar', 'bop_theme' ),           // Widget area name (displayed in admin)
+		'id'            => 'sidebar-1',                                     // Unique ID for the sidebar
+		'description'   => esc_html__( 'Add widgets here.', 'bop_theme' ), // Description shown in admin
+		'before_widget' => '<section id="%1$s" class="widget %2$s">',      // HTML before each widget
+		'after_widget'  => '</section>',                                    // HTML after each widget
+		'before_title'  => '<h2 class="widget-title">',                    // HTML before widget title
+		'after_title'   => '</h2>',                                          // HTML after widget title
 	) );
 }
 add_action( 'widgets_init', 'bop_theme_widgets_init' );
 
-
+/* ============================================================================
+ * SCRIPT AND STYLE ENQUEUING
+ * ============================================================================
+ * Properly loads JavaScript and CSS files using WordPress enqueue functions.
+ * This ensures proper dependency management and prevents conflicts.
+ * ============================================================================ */
 
 /**
- * Enqueue scripts and styles.
+ * Enqueue scripts and styles
+ *
+ * Loads the theme's main stylesheet and core JavaScript files.
+ * This function uses WordPress's proper enqueue system which handles:
+ * - Dependency management
+ * - Version control for cache busting
+ * - Conditional loading
+ * - Script/style optimization
+ *
+ * Additional scripts and styles are loaded in /inc/custom.php
+ *
+ * Hook: wp_enqueue_scripts
+ * Priority: Default (10)
+ *
+ * @since 1.0.0
+ * @return void
  */
 function bop_theme_scripts() {
+	/**
+	 * Enqueue main theme stylesheet
+	 *
+	 * Loads style.css from the theme root directory.
+	 * This is the main stylesheet that contains theme header information
+	 * and base styles.
+	 */
 	wp_enqueue_style( 'bop_theme-style', get_stylesheet_uri() );
 
+	/**
+	 * Enqueue navigation script
+	 *
+	 * Loads the theme's navigation JavaScript file which handles
+	 * mobile menu functionality and other navigation interactions.
+	 *
+	 * @param string $handle    Script handle/ID
+	 * @param string $src       Script file path
+	 * @param array  $deps      Dependencies (empty array = no dependencies)
+	 * @param string $version   Version number for cache busting
+	 * @param bool   $in_footer Load in footer (true) or header (false)
+	 */
 	wp_enqueue_script( 'bop_theme-navigation', get_template_directory_uri() . '/js/navigation.js', array(), '20151215', true );
 
+	/**
+	 * Enqueue skip link focus fix script
+	 *
+	 * Fixes focus management for keyboard navigation, particularly
+	 * for skip links. This improves accessibility for keyboard users.
+	 */
 	wp_enqueue_script( 'bop_theme-skip-link-focus-fix', get_template_directory_uri() . '/js/skip-link-focus-fix.js', array(), '20151215', true );
 
+	/**
+	 * Conditionally load comment reply script
+	 *
+	 * Only loads the comment reply script on singular posts/pages
+	 * where comments are open and threaded comments are enabled.
+	 * This reduces unnecessary script loading and improves performance.
+	 */
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
 }
 add_action( 'wp_enqueue_scripts', 'bop_theme_scripts' );
 
+/* ============================================================================
+ * INCLUDE ADDITIONAL FUNCTION FILES
+ * ============================================================================
+ * These files contain additional theme functionality organized by purpose.
+ * Each file is included here to keep functions.php clean and maintainable.
+ * ============================================================================ */
+
 /**
- * Implement the Custom Header feature.
+ * Custom Header feature (currently disabled)
+ *
+ * Uncomment the line below to enable custom header functionality.
+ * Custom headers allow users to upload a header image through
+ * Appearance > Customize > Header Image.
+ *
+ * @see /inc/custom-header.php
  */
 //require get_template_directory() . '/inc/custom-header.php';
 
 /**
- * Custom template tags for this theme.
+ * Custom template tags for this theme
+ *
+ * Contains template tag functions that can be used in theme templates.
+ * Template tags are functions that output content or return data for
+ * use in template files (e.g., header.php, footer.php, etc.).
+ *
+ * @see /inc/template-tags.php
  */
 require get_template_directory() . '/inc/template-tags.php';
 
 /**
- * Functions which enhance the theme by hooking into WordPress.
+ * Functions which enhance the theme by hooking into WordPress
+ *
+ * Contains utility functions that enhance WordPress functionality
+ * through hooks and filters. These functions modify WordPress behavior
+ * without directly editing core files.
+ *
+ * @see /inc/template-functions.php
  */
 require get_template_directory() . '/inc/template-functions.php';
 
 /**
- * Customizer additions.
+ * Customizer additions
+ *
+ * Contains functions that add customization options to the WordPress
+ * Customizer (Appearance > Customize). This allows users to customize
+ * theme settings with a live preview.
+ *
+ * @see /inc/customizer.php
  */
 require get_template_directory() . '/inc/customizer.php';
 
 /**
- * Load Jetpack compatibility file.
-
- * if ( defined( 'JETPACK__VERSION' ) ) {
- * 	require get_template_directory() . '/inc/jetpack.php';
- * }
+ * Jetpack compatibility file (conditionally loaded)
+ *
+ * Uncomment the conditional block below to enable Jetpack plugin
+ * compatibility features. Jetpack provides additional functionality
+ * like social sharing, related posts, and more.
+ *
+ * The conditional check ensures the file is only loaded if Jetpack
+ * is installed and activated.
+ *
+ * @see /inc/jetpack.php
  */
-       /* Enqueue Scripts Begin */
-
-function enqueue_webflow_script() {
-    wp_enqueue_script( 'webflow', get_stylesheet_directory_uri() . '/js/webflow.js', array(), null, true );
-}
-add_action( 'wp_enqueue_scripts', 'enqueue_webflow_script' );
-
-function bopwins_enqueue_scripts() {
-    // Properly enqueue webfont in the wp_enqueue_scripts hook
-    wp_enqueue_script( 'webfont', 'https://ajax.googleapis.com/ajax/libs/webfont/1.4.7/webfont.js', array(), null, false );
-}
-add_action('wp_enqueue_scripts', 'bopwins_enqueue_scripts'); // Hooking it at the right time
-
-   // wp_deregister_script( 'cwxxfr' );
-    //wp_enqueue_script( 'cwxxfr', 'https://use.typekit.net/cwx6xfr.js', false, null, false);
-
-    //wp_deregister_script( 'awesome' );
-    //wp_enqueue_script( 'awesome', 'https://use.fontawesome.com/c7afeb4f58.js', false, null, true);
-
-	//wp_deregister_script( 'google-fonts' );
-  	//wp_enqueue_style( 'google-fonts', 'https://fonts.googleapis.com/css?family=Montserrat:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic', false );
-
-    //wp_deregister_script( 'webflow' );
-    //wp_enqueue_style( 'webflow', '/js/webflow.js', true );
-
-
-
-
-
-/* Enqueue Scripts End */
-
-if ( ! function_exists( 'bop_theme_enqueue_scripts' ) ) :
-    function bop_theme_enqueue_scripts() {
-
-    /*  Enqueue Styles Begin */
-
-		//wp_deregister_style( 'lightgallery' );
-		//wp_enqueue_style( 'lightgallery', get_template_directory_uri() . '/css/lightgallery.css', false, null, 'all');
-
-		//wp_deregister_style( 'style' );
-    wp_enqueue_style( 'style', get_template_directory_uri() . '/style.css', false, null, 'all');
-
-    //wp_deregister_style( 'normalize' );
-    wp_enqueue_style( 'normalize', get_template_directory_uri() . '/css/normalize.css', false, null, 'all');
-
-    //wp_deregister_style( 'webflow' );
-    //wp_enqueue_style( 'webflow', get_template_directory_uri() . '/css/webflow.css', false, null, 'all');
-
-		// get random number
-		function wpmix_get_random() {
-			$randomizr = '-' . rand(100,999);
-			return $randomizr;
-		}
-		$random_number = wpmix_get_random();
-		global $random_number;
-
-		// include custom stylesheet
-		function wpmix_queue_css() {
-			global $theme_version, $random_number;
-			if (!is_admin()) {
-
-				wp_register_style('webflow', get_template_directory_uri() . '/css/webflow.css', false, $theme_version . $random_number);
-				wp_enqueue_style('webflow');
-
-				wp_register_style('bopsitedesign', get_template_directory_uri() . '/css/bopsitedesign.webflow.css', false, $theme_version . $random_number);
-				wp_enqueue_style('bopsitedesign');
-
-				wp_register_style('bopmisc', get_template_directory_uri() . '/css/bopmisc.css', false, $theme_version . $random_number);
-				wp_enqueue_style('bopmisc');
-
-
-			}
-		}
-		add_action('wp_print_styles', 'wpmix_queue_css');
-
-
-
-		//wp_deregister_style( 'bopsitedesign' );
-    //wp_enqueue_style( 'bopsitedesign', get_template_directory_uri() . '/css/bopsitedesign.webflow.css', false, null, 'all');
-
-		//wp_deregister_style( 'bopgeneric' );
-    //wp_enqueue_style( 'bopgeneric', get_template_directory_uri() . '/css/bop-generic.css', false, null, 'all');
-
-    //wp_deregister_style( 'bopmisc' );
-    //wp_enqueue_style( 'bopmisc', get_template_directory_uri() . '/css/bopmisc.css', false, null, 'all');
-
-		//wp_deregister_style( 'lightslider' );
-		//wp_enqueue_style( 'lightslider', get_template_directory_uri() . '/css/lightGallery.css', false, null, 'all');
-
-		//wp_deregister_style( 'bop-megamenu' );
-		//wp_enqueue_style( 'bop-megamenu', get_template_directory_uri() . '/css/bop-megamenu.css', false, null, 'all');
-
-    //wp_deregister_style( 'editor-style' );
-    //wp_enqueue_style( 'editor-style', get_template_directory_uri() . '/editor-style.css', false, null, 'all');
-
-    //wp_deregister_style( 'skipto' );
-    //wp_enqueue_style( 'skipto', get_template_directory_uri() . '/css/skipto.css', false, null, 'all');
-
-
-
-    /* Enqueue Styles End */
-
-    }
-    add_action( 'wp_enqueue_scripts', 'bop_theme_enqueue_scripts' );
-endif;
-
-    /**
-     * Custom template tags for this theme.
-     */
-    require( get_template_directory() . '/inc/template-tags.php' );
-
-    /**
-     * Custom functions that act independently of the theme templates
-     */
-    require( get_template_directory() . '/inc/bop-tweaks.php' );
-
-    /**
-     * Custom functions that act independently of the theme templates
-     */
-    require( get_template_directory() . '/inc/tweaktesting.php' );
-
-    /**
-     * Custom functions that act independently of the theme templates
-     */
-    //require( get_template_directory() . '/inc/disqus.php' );
-
-     /**
-     * Custom functions that act independently of the theme templates
-     */
-    //require( get_template_directory() . '/inc/cpttweaks.php' );
-
-    /**
-     * Custom functions that act independently of the theme templates
-     */
-    //require( get_template_directory() . '/inc/imagesizes.php' );
-
-    /**
-     * Custom functions that act independently of the theme templates - specific to the local development server
-     */
-    //require( get_template_directory() . '/inc/bop-adminbars.php' );
-
-    /**
-     * Custom functions that act independently of the theme templates - specific to the local development server
-     */
-    //require( get_template_directory() . '/inc/update-nag.php' );
-
-		//register custom menu
-		//function wpb_custom_new_menu() {
-  //register_nav_menu('my-custom-menu',__( 'My Custom Menu' ));
-	//}
-	//add_action( 'init', 'wpb_custom_new_menu' );
-
-	function my_theme_load_theme_textdomain() {
-    load_theme_textdomain( 'my-theme', get_template_directory() . '/languages' );
-}
-add_action( 'after_setup_theme', 'my_theme_load_theme_textdomain' );
-
-function wpse_custom_menu_order( $menu_ord ) {
-    if ( !$menu_ord ) return true;
-
-    return array(
-        'index.php', // Dashboard
-        'separator1', // First separator
-        'edit.php', // Posts
-        'upload.php', // Media
-        'link-manager.php', // Links
-        'edit-comments.php', // Comments
-        'edit.php?post_type=page', // Pages
-        'separator2', // Second separator
-        'themes.php', // Appearance
-        'plugins.php', // Plugins
-        'users.php', // Users
-        'tools.php', // Tools
-        'options-general.php', // Settings
-        'separator-last', // Last separator
-    );
-}
-add_filter( 'custom_menu_order', 'wpse_custom_menu_order', 10, 1 );
-add_filter( 'menu_order', 'wpse_custom_menu_order', 10, 1 );
-
-
-// Add Title to next post link
-add_filter('next_post_link', function($crunchify_link) {
-  $next_post = get_next_post();
-  $crunchify_title = $next_post->post_title;
-  $crunchify_link = str_replace('href=', 'title="'.$crunchify_title.'" href=', $crunchify_link);
-  return $crunchify_link;
-});
-
-// Add Title to previous post link
-add_filter('previous_post_link', function($crunchify_link) {
-  $previous_post = get_previous_post();
-  $crunchify_title = $previous_post->post_title;
-  $crunchify_link = str_replace('href=', 'title="'.$crunchify_title.'" href=', $crunchify_link);
-  return $crunchify_link;
-});
+// if ( defined( 'JETPACK__VERSION' ) ) {
+// 	require get_template_directory() . '/inc/jetpack.php';
+// }
 
 /**
- * This shortcode will allow you to create a snapshot of a remote website and post it
- * on your WordPress site.
+ * All custom theme functions
  *
- * [snapshot url="http://www.wordpress.org" alt="WordPress.org" width="400" height="300"]
+ * Contains all custom functions that extend WordPress functionality.
+ * This is the main file for custom code and includes:
+ * - Script and style enqueuing
+ * - Custom shortcodes
+ * - Menu registrations
+ * - Media handling functions
+ * - Admin customizations
+ * - Content width adjustments
+ * - Comment system modifications
+ * - Editor customizations
+ * - ACF integrations
+ * - BOP-specific tweaks and customizations
+ * - And more...
+ *
+ * Note: Functions previously in /inc/bop-tweaks.php have been
+ * consolidated into this file for better organization.
+ *
+ * @see /inc/custom.php
  */
-add_shortcode( 'snapshot', function ( $atts ) {
-	$atts = shortcode_atts( array(
-		'alt'    => '',
-		'url'    => 'http://www.wordpress.org',
-		'width'  => '400',
-		'height' => '300'
-	), $atts );
-	$params = array(
-		'w' => $atts['width'],
-		'h' => $atts['height'],
-	);
-	$url = urlencode( $atts['url'] );
-	$src = 'http://s.wordpress.com/mshots/v1/' . $url . '?' . http_build_query( $params, null, '&' );
-
-	$cache_key = 'snapshot_' . md5( $src );
-	$data_uri = get_transient( $cache_key );
-	if ( ! $data_uri ) {
-		$response = wp_remote_get( $src );
-		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
-			$image_data = wp_remote_retrieve_body( $response );
-			if ( $image_data && is_string( $image_data ) ) {
-				$src = $data_uri = 'data:image/jpeg;base64,' . base64_encode( $image_data );
-				set_transient( $cache_key, $data_uri, DAY_IN_SECONDS );
-			}
-		}
-	}
-
-	return '<img src="' . esc_attr( $src ) . '" alt="' . esc_attr( $atts['alt'] ) . '"/>';
-} );
-
-function wpb_custom_new_menu() {
-  register_nav_menu('contest-entry',__( 'Contest Entry Menu' ));
-}
-add_action( 'init', 'wpb_custom_new_menu' );
-
-//copy first 52 characters of caption into the alt tag
-
-function set_image_alt_from_iptc_caption($metadata, $attachment_id) {
-    // Get the full path to the original file
-    $file_path = get_attached_file($attachment_id);
-
-    // Check if the file exists
-    if (!file_exists($file_path)) {
-        return $metadata;
-    }
-
-    // Extract IPTC data
-    $size = getimagesize($file_path, $info);
-    if (isset($info['APP13'])) {
-        $iptc = iptcparse($info['APP13']);
-        if (isset($iptc['2#120'][0])) { // Check if caption exists
-            $caption = $iptc['2#120'][0];
-            // Take first 52 characters of the caption
-            $short_caption = substr($caption, 0, 52);
-
-            // Update the alt text for the image
-            update_post_meta($attachment_id, '_wp_attachment_image_alt', sanitize_text_field($short_caption));
-        }
-    }
-
-    return $metadata;
-}
-
-add_filter('wp_generate_attachment_metadata', 'set_image_alt_from_iptc_caption', 10, 2);
-
-
-/* ==== ADDED ERROR LOGGING FOR DEBUGGING ==== */
-/*
-function bop_debug_log($message) {
-    if (WP_DEBUG === true) {
-        error_log(print_r($message, true));
-    }
-}
-*/
-
-
-
-// Example: Log when scripts are enqueued
-// bop_debug_log("Scripts enqueued successfully.");
-/* ==== END ERROR LOGGING ==== */
-
-
-//To stop a PHP warning pages (and not a fatal error), then add this to your child theme’s functions.php or as a Code Snippet to suppress the PHP warnings:
-error_reporting(E_ERROR);
+require get_template_directory() . '/inc/custom.php';
