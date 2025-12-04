@@ -34,3 +34,13 @@ npm-debug.log
 *.min.js.map
 *.min.css.map
 
+# Backup files and directories
+*_off*
+*_broken*
+*copy*
+*_v1*
+*_v2*
+*doesnotwork*
+*nogallery*
+unused_backups_off/
+
