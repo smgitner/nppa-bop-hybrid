@@ -763,3 +763,971 @@ add_filter( 'acf/update_value/name=mugshot', 'acf_set_featured_image', 10, 3 );
  * @return void
  */
 error_reporting( E_ERROR );
+
+/* ============================================================================
+ * CSV Import Functions for Mega Menu
+ * ============================================================================ */
+
+/**
+ * Import Mega Menu from CSV
+ *
+ * Reads a CSV file and populates the ACF mega menu structure.
+ * CSV format: division, category, category_url
+ *
+ * @since 1.1.0
+ * @param string $csv_file_path Path to the CSV file
+ * @return array|WP_Error Array of imported data or WP_Error on failure
+ */
+function bop_import_mega_menu_csv( $csv_file_path ) {
+	if ( ! function_exists( 'get_field' ) ) {
+		return new WP_Error( 'acf_missing', 'ACF plugin is required for this function.' );
+	}
+
+	if ( ! file_exists( $csv_file_path ) ) {
+		return new WP_Error( 'file_not_found', 'CSV file not found: ' . $csv_file_path );
+	}
+
+	$handle = fopen( $csv_file_path, 'r' );
+	if ( $handle === false ) {
+		return new WP_Error( 'file_open_error', 'Could not open CSV file.' );
+	}
+
+	// Skip header row
+	$header = fgetcsv( $handle );
+	
+	$divisions = array();
+	$seen_items = array(); // Track items to avoid duplicates
+
+	// Read CSV data
+	while ( ( $data = fgetcsv( $handle ) ) !== false ) {
+		if ( count( $data ) < 3 ) {
+			continue; // Skip invalid rows
+		}
+
+		$division = trim( $data[0] );
+		$category = trim( $data[1] );
+		$category_url = trim( $data[2] );
+
+		// Skip empty rows
+		if ( empty( $division ) || empty( $category ) || empty( $category_url ) ) {
+			continue;
+		}
+
+		// Create unique key to avoid duplicates
+		$item_key = $division . '|' . $category . '|' . $category_url;
+		if ( isset( $seen_items[ $item_key ] ) ) {
+			continue; // Skip duplicate rows
+		}
+		$seen_items[ $item_key ] = true;
+
+		// Initialize division if it doesn't exist
+		if ( ! isset( $divisions[ $division ] ) ) {
+			$divisions[ $division ] = array(
+				'column_title' => $division,
+				'items'        => array(),
+				'sections'     => array(),
+			);
+		}
+
+		// Build URL from slug - use category_url directly or convert to URL
+		$url = home_url( '/' . sanitize_title( $category_url ) . '/' );
+
+		// Add category to division (avoid duplicates within division)
+		$item_exists = false;
+		foreach ( $divisions[ $division ]['items'] as $existing_item ) {
+			if ( $existing_item['item_title'] === $category && $existing_item['item_url'] === $url ) {
+				$item_exists = true;
+				break;
+			}
+		}
+
+		if ( ! $item_exists ) {
+			$divisions[ $division ]['items'][] = array(
+				'item_title' => $category,
+				'item_url'   => $url,
+				'item_target' => false,
+				'item_active' => false,
+			);
+		}
+	}
+
+	fclose( $handle );
+
+	// Convert divisions array to ACF format
+	$mega_menu_columns = array();
+	foreach ( $divisions as $division ) {
+		$mega_menu_columns[] = $division;
+	}
+
+	return $mega_menu_columns;
+}
+
+/**
+ * Save Mega Menu to ACF Options
+ *
+ * Saves the imported mega menu data to ACF options page.
+ *
+ * @since 1.1.0
+ * @param array $mega_menu_data The mega menu data from CSV import
+ * @param string $menu_item_title The title of the menu item to update
+ * @return bool|WP_Error True on success, WP_Error on failure
+ */
+function bop_save_mega_menu_to_acf( $mega_menu_data, $menu_item_title = 'Categories' ) {
+	if ( ! function_exists( 'get_field' ) || ! function_exists( 'update_field' ) ) {
+		return new WP_Error( 'acf_missing', 'ACF plugin is required for this function.' );
+	}
+
+	// Get current menu items
+	$menu_items = get_field( 'primary_menu_items', 'option' );
+	
+	if ( ! is_array( $menu_items ) ) {
+		$menu_items = array();
+	}
+
+	// Find or create the menu item
+	$menu_item_index = -1;
+	foreach ( $menu_items as $index => $item ) {
+		if ( isset( $item['menu_title'] ) && $item['menu_title'] === $menu_item_title ) {
+			$menu_item_index = $index;
+			break;
+		}
+	}
+
+	// If menu item not found, create it
+	if ( $menu_item_index === -1 ) {
+		$menu_item_index = count( $menu_items );
+		$menu_items[] = array(
+			'menu_title' => $menu_item_title,
+			'menu_url'   => '#',
+			'menu_target' => false,
+			'menu_type'  => 'mega',
+		);
+	}
+
+	// Update the menu item with mega menu data
+	$menu_items[ $menu_item_index ]['menu_type'] = 'mega';
+	$menu_items[ $menu_item_index ]['mega_menu_columns'] = $mega_menu_data;
+
+	// Save to ACF
+	$result = update_field( 'primary_menu_items', $menu_items, 'option' );
+
+	return $result ? true : new WP_Error( 'save_failed', 'Failed to save mega menu data to ACF.' );
+}
+
+/**
+ * Admin Page for CSV Import
+ *
+ * Creates an admin page for importing mega menu CSV files.
+ * This will appear as a submenu under Site Options if available,
+ * otherwise as a standalone menu item.
+ *
+ * @since 1.1.0
+ */
+function bop_add_mega_menu_import_page() {
+	global $submenu, $menu;
+	
+	// ACF creates the menu with menu_slug 'site-options'
+	// WordPress converts it to a hook, try multiple possibilities
+	$possible_parents = array(
+		'acf-options-site-options',
+		'site-options',
+		'acf-options-site_options',
+	);
+	
+	$parent_slug = 'acf-options-site-options'; // Default
+	
+	// Find the actual parent slug from submenu
+	foreach ( $possible_parents as $possible ) {
+		if ( isset( $submenu[ $possible ] ) ) {
+			$parent_slug = $possible;
+			break;
+		}
+	}
+	
+	// Also check menu items (top level)
+	if ( $parent_slug === 'acf-options-site-options' ) {
+		foreach ( $menu as $menu_item ) {
+			if ( isset( $menu_item[2] ) && ( $menu_item[2] === 'site-options' || strpos( $menu_item[2], 'site-options' ) !== false ) ) {
+				$parent_slug = $menu_item[2];
+				break;
+			}
+		}
+	}
+	
+	// Add as submenu - WordPress will handle if parent doesn't exist
+	add_submenu_page(
+		$parent_slug,
+		'Import Mega Menu',
+		'Import Mega Menu',
+		'manage_options',
+		'import-mega-menu',
+		'bop_mega_menu_import_page_callback'
+	);
+}
+// Use very high priority to ensure ACF has created the menu first
+add_action( 'admin_menu', 'bop_add_mega_menu_import_page', 999 );
+
+/**
+ * Mega Menu Import Page Callback
+ *
+ * Displays the import page and handles CSV upload/import.
+ *
+ * @since 1.1.0
+ */
+function bop_mega_menu_import_page_callback() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'You do not have sufficient permissions to access this page.' );
+	}
+
+	$message = '';
+	$message_type = '';
+
+	// Handle file upload
+	if ( isset( $_POST['bop_import_csv'] ) && isset( $_FILES['csv_file'] ) && ! empty( $_FILES['csv_file']['tmp_name'] ) ) {
+		check_admin_referer( 'bop_import_mega_menu' );
+
+		$uploaded_file = $_FILES['csv_file']['tmp_name'];
+		$menu_item_title = isset( $_POST['menu_item_title'] ) ? sanitize_text_field( $_POST['menu_item_title'] ) : 'Categories';
+
+		// Import CSV
+		$mega_menu_data = bop_import_mega_menu_csv( $uploaded_file );
+
+		if ( is_wp_error( $mega_menu_data ) ) {
+			$message = 'Error: ' . $mega_menu_data->get_error_message();
+			$message_type = 'error';
+		} else {
+			// Save to ACF
+			$result = bop_save_mega_menu_to_acf( $mega_menu_data, $menu_item_title );
+
+			if ( is_wp_error( $result ) ) {
+				$message = 'Error saving: ' . $result->get_error_message();
+				$message_type = 'error';
+			} else {
+				$message = 'Mega menu imported successfully! ' . count( $mega_menu_data ) . ' columns imported.';
+				$message_type = 'success';
+			}
+		}
+	}
+	?>
+	<div class="wrap">
+		<h1>Import Mega Menu from CSV</h1>
+		
+		<?php if ( $message ) : ?>
+			<div class="notice notice-<?php echo esc_attr( $message_type === 'success' ? 'success' : 'error' ); ?> is-dismissible">
+				<p><?php echo esc_html( $message ); ?></p>
+			</div>
+		<?php endif; ?>
+
+		<div class="card">
+			<h2>Manage Mega Menu</h2>
+			<p>To manually create or edit the mega menu structure, go to <a href="<?php echo esc_url( admin_url( 'admin.php?page=acf-options-site-options' ) ); ?>"><strong>Site Options</strong></a> and edit the "Menu Items" field. You can add menu items, set up mega menu columns, and configure dropdown items there.</p>
+			<p><em>This import tool will populate the mega menu data from a CSV file, but you can always edit it manually on the Site Options page.</em></p>
+		</div>
+
+		<div class="card" style="margin-top: 20px;">
+			<h2>CSV Format</h2>
+			<p>Your CSV file should have the following columns:</p>
+			<ul>
+				<li><strong>division</strong> - The column title (e.g., "Still Photojournalism", "Picture Editing")</li>
+				<li><strong>category</strong> - The menu item title</li>
+				<li><strong>category_url</strong> - The URL slug (will be converted to full URL)</li>
+			</ul>
+			<p><strong>Note:</strong> The first row should be headers and will be skipped.</p>
+		</div>
+
+		<form method="post" enctype="multipart/form-data" class="card" style="margin-top: 20px;">
+			<?php wp_nonce_field( 'bop_import_mega_menu' ); ?>
+			
+			<table class="form-table">
+				<tr>
+					<th scope="row">
+						<label for="csv_file">CSV File</label>
+					</th>
+					<td>
+						<input type="file" name="csv_file" id="csv_file" accept=".csv" required>
+						<p class="description">Select the CSV file to import.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">
+						<label for="menu_item_title">Menu Item Title</label>
+					</th>
+					<td>
+						<input type="text" name="menu_item_title" id="menu_item_title" value="Categories" class="regular-text">
+						<p class="description">The title of the menu item that will contain this mega menu (e.g., "Categories").</p>
+					</td>
+				</tr>
+			</table>
+
+			<?php submit_button( 'Import CSV', 'primary', 'bop_import_csv' ); ?>
+		</form>
+	</div>
+	<?php
+}
+
+/* ============================================================================
+ * ACF Options Pages
+ * ============================================================================ */
+
+/**
+ * Register ACF Options Page: Site Options
+ *
+ * Creates a "Site Options" menu in the WordPress admin where site-wide
+ * settings can be managed, including navigation menus.
+ *
+ * @since 1.1.0
+ */
+if ( function_exists( 'acf_add_options_page' ) ) {
+	acf_add_options_page( array(
+		'page_title'  => 'Site Options',
+		'menu_title'  => 'Site Options',
+		'menu_slug'   => 'site-options',
+		'capability'  => 'edit_posts',
+		'icon_url'    => 'dashicons-admin-settings',
+		'position'    => 30,
+	) );
+}
+
+/**
+ * Rename Site Options submenu to "Nav Menu"
+ *
+ * Changes the submenu item title from "Site Options" to "Nav Menu"
+ * so it's clearer what that page is for.
+ *
+ * @since 1.1.0
+ */
+function bop_rename_site_options_submenu() {
+	global $submenu;
+	
+	// Find and rename the Site Options submenu item
+	// Check all possible parent slugs
+	$possible_parents = array(
+		'acf-options-site-options',
+		'site-options',
+		'acf-options-site_options',
+	);
+	
+	// Also check all submenus for the site-options page
+	foreach ( $submenu as $parent_slug => $items ) {
+		if ( strpos( $parent_slug, 'site-options' ) !== false || strpos( $parent_slug, 'site_options' ) !== false ) {
+			foreach ( $items as $key => $item ) {
+				// Find the item that matches the ACF options page slug
+				if ( isset( $item[2] ) ) {
+					$item_slug = $item[2];
+					if ( $item_slug === 'acf-options-site-options' || 
+					     $item_slug === 'site-options' ||
+					     ( isset( $item[0] ) && $item[0] === 'Site Options' ) ) {
+						// Change the menu title (index 0) to "Nav Menu"
+						$submenu[ $parent_slug ][ $key ][0] = 'Nav Menu';
+						break 2; // Break out of both loops
+					}
+				}
+			}
+		}
+	}
+}
+// Run at very high priority to ensure ACF has created the menu
+add_action( 'admin_menu', 'bop_rename_site_options_submenu', 1000 );
+
+/**
+ * Add Site Options Dashboard Page
+ *
+ * Creates a dashboard/landing page for Site Options that lists all available tools.
+ * This appears as the first submenu item under Site Options.
+ *
+ * @since 1.1.0
+ */
+function bop_add_site_options_dashboard() {
+	global $submenu;
+	
+	// ACF creates the menu with menu_slug 'site-options'
+	// WordPress converts it to a hook, try multiple possibilities
+	$possible_parents = array(
+		'acf-options-site-options',
+		'site-options',
+		'acf-options-site_options',
+	);
+	
+	$parent_slug = 'acf-options-site-options'; // Default
+	
+	// Find the actual parent slug
+	foreach ( $possible_parents as $possible ) {
+		if ( isset( $submenu[ $possible ] ) ) {
+			$parent_slug = $possible;
+			break;
+		}
+	}
+	
+	// Also check menu items (top level)
+	global $menu;
+	foreach ( $menu as $menu_item ) {
+		if ( isset( $menu_item[2] ) && ( $menu_item[2] === 'site-options' || strpos( $menu_item[2], 'site-options' ) !== false ) ) {
+			$parent_slug = $menu_item[2];
+			break;
+		}
+	}
+	
+	// Add dashboard as submenu under Site Options
+	// Use position 0 to make it appear first
+	add_submenu_page(
+		$parent_slug,
+		'Site Options Dashboard',
+		'Dashboard',
+		'edit_posts',
+		'site-options-dashboard',
+		'bop_site_options_dashboard_callback',
+		0
+	);
+}
+// Use very high priority to ensure ACF has created the menu first
+add_action( 'admin_menu', 'bop_add_site_options_dashboard', 999 );
+
+/**
+ * Site Options Dashboard Callback
+ *
+ * Displays a dashboard with links to all Site Options tools and settings.
+ *
+ * @since 1.1.0
+ */
+function bop_site_options_dashboard_callback() {
+	if ( ! current_user_can( 'edit_posts' ) ) {
+		wp_die( 'You do not have sufficient permissions to access this page.' );
+	}
+	?>
+	<div class="wrap">
+		<h1>Site Options Dashboard</h1>
+		<p class="description">Manage your site settings, navigation menus, and import tools from this central location.</p>
+
+		<div class="site-options-dashboard" style="margin-top: 20px;">
+			<div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+				
+				<!-- Nav Menu Card -->
+				<div class="card" style="padding: 20px;">
+					<h2 style="margin-top: 0;">
+						<span class="dashicons dashicons-menu" style="font-size: 24px; vertical-align: middle; margin-right: 8px;"></span>
+						Nav Menu
+					</h2>
+					<p>Configure navigation menus, mega menu structure, and other site-wide settings.</p>
+					<p>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=acf-options-site-options' ) ); ?>" class="button button-primary">
+							Manage Nav Menu
+						</a>
+					</p>
+				</div>
+
+				<!-- Mega Menu Management Card -->
+				<div class="card" style="padding: 20px;">
+					<h2 style="margin-top: 0;">
+						<span class="dashicons dashicons-menu" style="font-size: 24px; vertical-align: middle; margin-right: 8px;"></span>
+						Mega Menu
+					</h2>
+					<p>Create and manage your mega menu structure. Import from CSV or edit manually.</p>
+					<p>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=acf-options-site-options#menu-items' ) ); ?>" class="button">
+							Edit Mega Menu
+						</a>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=import-mega-menu' ) ); ?>" class="button">
+							Import from CSV
+						</a>
+					</p>
+				</div>
+
+				<!-- CSV List Import Card -->
+				<div class="card" style="padding: 20px;">
+					<h2 style="margin-top: 0;">
+						<span class="dashicons dashicons-list-view" style="font-size: 24px; vertical-align: middle; margin-right: 8px;"></span>
+						CSV List Import
+					</h2>
+					<p>Import CSV data into posts/pages to display as lists with featured images.</p>
+					<p>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=import-csv-list' ) ); ?>" class="button button-primary">
+							Import CSV List
+						</a>
+					</p>
+				</div>
+
+				<!-- CPT CSV Import Card -->
+				<div class="card" style="padding: 20px;">
+					<h2 style="margin-top: 0;">
+						<span class="dashicons dashicons-admin-post" style="font-size: 24px; vertical-align: middle; margin-right: 8px;"></span>
+						Import CPT from CSV
+					</h2>
+					<p>Import CSV data into Custom Post Types. Update existing posts or create new ones based on CSV data.</p>
+					<p>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=import-cpt-csv' ) ); ?>" class="button button-primary">
+							Import CPT from CSV
+						</a>
+					</p>
+				</div>
+
+			</div>
+
+			<!-- Quick Links Section -->
+			<div class="card" style="margin-top: 20px; padding: 20px;">
+				<h2>Quick Links</h2>
+				<ul style="list-style: disc; margin-left: 20px;">
+					<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=acf-options-site-options' ) ); ?>">Nav Menu</a> - Configure navigation menus and site-wide settings</li>
+					<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=import-mega-menu' ) ); ?>">Import Mega Menu</a> - Import mega menu structure from CSV</li>
+					<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=import-csv-list' ) ); ?>">Import CSV List</a> - Import CSV data for post/page lists</li>
+					<li><a href="<?php echo esc_url( admin_url( 'admin.php?page=import-cpt-csv' ) ); ?>">Import CPT from CSV</a> - Import/update Custom Post Type posts from CSV</li>
+					<li><a href="<?php echo esc_url( admin_url( 'nav-menus.php' ) ); ?>">WordPress Menus</a> - Manage standard WordPress navigation menus</li>
+				</ul>
+			</div>
+
+			<!-- Help Section -->
+			<div class="card" style="margin-top: 20px; padding: 20px; background-color: #f0f6fc;">
+				<h2 style="margin-top: 0;">Need Help?</h2>
+				<p><strong>Mega Menu:</strong> Go to Site Settings to manually create and edit your mega menu structure. Use the Import Mega Menu tool to bulk import from CSV.</p>
+				<p><strong>CSV Lists:</strong> Import CSV files to create lists of posts with featured images. The data is stored in the selected post/page and can be displayed using the CSV List template.</p>
+			</div>
+		</div>
+	</div>
+	<?php
+}
+
+/* ============================================================================
+ * ACF Navigation Functions
+ * ============================================================================ */
+
+/**
+ * Get ACF Navigation Menu Items
+ *
+ * Retrieves navigation menu items from ACF options page.
+ * Supports hierarchical dropdown menus.
+ *
+ * @since 1.1.0
+ * @param string $menu_location The menu location identifier (e.g., 'primary', 'footer-about').
+ * @return array Array of menu items with structure: ['title', 'url', 'target', 'children']
+ */
+function bop_get_acf_nav_menu( $menu_location = 'primary' ) {
+	if ( ! function_exists( 'get_field' ) ) {
+		return array();
+	}
+
+	$menu_items = get_field( $menu_location . '_menu_items', 'option' );
+	
+	if ( ! $menu_items || ! is_array( $menu_items ) ) {
+		return array();
+	}
+
+	$formatted_items = array();
+	
+	foreach ( $menu_items as $item ) {
+		$menu_type = isset( $item['menu_type'] ) ? $item['menu_type'] : 'none';
+		
+		$formatted_item = array(
+			'title'     => isset( $item['menu_title'] ) ? $item['menu_title'] : '',
+			'url'       => isset( $item['menu_url'] ) ? esc_url( $item['menu_url'] ) : '#',
+			'target'    => isset( $item['menu_target'] ) && $item['menu_target'] ? '_blank' : '',
+			'menu_type' => $menu_type,
+			'children'  => array(),
+			'mega_menu' => array(),
+		);
+
+		// Check for simple dropdown items
+		if ( $menu_type === 'dropdown' && isset( $item['dropdown_items'] ) && is_array( $item['dropdown_items'] ) ) {
+			foreach ( $item['dropdown_items'] as $child ) {
+				$formatted_item['children'][] = array(
+					'title'  => isset( $child['menu_title'] ) ? $child['menu_title'] : '',
+					'url'    => isset( $child['menu_url'] ) ? esc_url( $child['menu_url'] ) : '#',
+					'target' => isset( $child['menu_target'] ) && $child['menu_target'] ? '_blank' : '',
+				);
+			}
+		}
+
+		// Check for mega menu columns
+		if ( $menu_type === 'mega' && isset( $item['mega_menu_columns'] ) && is_array( $item['mega_menu_columns'] ) ) {
+			foreach ( $item['mega_menu_columns'] as $column ) {
+				$column_data = array(
+					'title'    => isset( $column['column_title'] ) ? $column['column_title'] : '',
+					'items'    => array(),
+					'sections' => array(),
+				);
+
+				// Add column items
+				if ( isset( $column['column_items'] ) && is_array( $column['column_items'] ) ) {
+					foreach ( $column['column_items'] as $col_item ) {
+						$column_data['items'][] = array(
+							'title'  => isset( $col_item['item_title'] ) ? $col_item['item_title'] : '',
+							'url'    => isset( $col_item['item_url'] ) ? esc_url( $col_item['item_url'] ) : '#',
+							'target' => isset( $col_item['item_target'] ) && $col_item['item_target'] ? '_blank' : '',
+							'active'  => isset( $col_item['item_active'] ) && $col_item['item_active'] ? true : false,
+						);
+					}
+				}
+
+				// Add column sections (sub-sections)
+				if ( isset( $column['column_sections'] ) && is_array( $column['column_sections'] ) ) {
+					foreach ( $column['column_sections'] as $section ) {
+						$section_data = array(
+							'title' => isset( $section['section_title'] ) ? $section['section_title'] : '',
+							'items' => array(),
+						);
+
+						if ( isset( $section['section_items'] ) && is_array( $section['section_items'] ) ) {
+							foreach ( $section['section_items'] as $sec_item ) {
+								$section_data['items'][] = array(
+									'title'  => isset( $sec_item['item_title'] ) ? $sec_item['item_title'] : '',
+									'url'    => isset( $sec_item['item_url'] ) ? esc_url( $sec_item['item_url'] ) : '#',
+									'target' => isset( $sec_item['item_target'] ) && $sec_item['item_target'] ? '_blank' : '',
+								);
+							}
+						}
+
+						$column_data['sections'][] = $section_data;
+					}
+				}
+
+				$formatted_item['mega_menu'][] = $column_data;
+			}
+		}
+
+		$formatted_items[] = $formatted_item;
+	}
+
+	return $formatted_items;
+}
+
+/**
+ * Render ACF Navigation Menu
+ *
+ * Outputs HTML for navigation menu using ACF data.
+ * Supports dropdowns and mega menus.
+ *
+ * @since 1.1.0
+ * @param string $menu_location The menu location identifier.
+ * @param string $menu_type Type of menu: 'desktop', 'mobile', or 'footer'.
+ * @return void
+ */
+function bop_render_acf_nav_menu( $menu_location = 'primary', $menu_type = 'desktop' ) {
+	$menu_items = bop_get_acf_nav_menu( $menu_location );
+	
+	if ( empty( $menu_items ) ) {
+		return;
+	}
+
+	$ul_class = '';
+	$li_class = '';
+	$a_class = '';
+
+	// Set classes based on menu type
+	switch ( $menu_type ) {
+		case 'desktop':
+			$ul_class = 'flex items-center space-x-8';
+			$li_class = 'relative';
+			$a_class = 'text-gray-700 hover:text-bop-blue transition-colors duration-200';
+			break;
+		case 'mobile':
+			$ul_class = 'space-y-2';
+			$li_class = '';
+			$a_class = 'block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-bop-blue rounded-md transition-colors duration-200';
+			break;
+		case 'footer':
+			$ul_class = 'space-y-4';
+			$li_class = '';
+			$a_class = 'text-gray-300 hover:text-white transition-colors duration-200';
+			break;
+	}
+
+	echo '<ul class="' . esc_attr( $ul_class ) . '">';
+	
+	foreach ( $menu_items as $item ) {
+		$has_children = ! empty( $item['children'] );
+		$has_mega_menu = ! empty( $item['mega_menu'] );
+		$item_menu_type = isset( $item['menu_type'] ) ? $item['menu_type'] : 'none';
+		$item_class = $li_class;
+		
+		if ( ( $has_children || $has_mega_menu ) && $menu_type === 'desktop' ) {
+			$item_class .= ' has-mega-menu';
+			if ( $item_menu_type === 'dropdown' ) {
+				$item_class .= ' has-dropdown group';
+			}
+		}
+
+		echo '<li class="' . esc_attr( trim( $item_class ) ) . '" data-menu-type="' . esc_attr( $item_menu_type ) . '">';
+		
+		// Main menu link
+		$link_attrs = 'href="' . esc_url( $item['url'] ) . '"';
+		$link_attrs .= ' class="' . esc_attr( $a_class ) . ' flex items-center"';
+		if ( ! empty( $item['target'] ) ) {
+			$link_attrs .= ' target="' . esc_attr( $item['target'] ) . '" rel="noopener noreferrer"';
+		}
+		
+		echo '<a ' . $link_attrs . '>';
+		echo esc_html( $item['title'] );
+		// Add chevron icon for items with dropdowns or mega menus
+		if ( ( $has_children || $has_mega_menu ) && $menu_type === 'desktop' ) {
+			echo '<svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>';
+		}
+		echo '</a>';
+		
+		// Store mega menu data as JSON for JavaScript
+		if ( $has_mega_menu && $menu_type === 'desktop' ) {
+			echo '<div class="mega-menu-content hidden">';
+			echo json_encode( $item['mega_menu'] );
+			echo '</div>';
+		}
+		
+		// Simple dropdown menu for desktop
+		if ( $has_children && $item_menu_type === 'dropdown' && $menu_type === 'desktop' ) {
+			echo '<ul class="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">';
+			foreach ( $item['children'] as $child ) {
+				echo '<li>';
+				$child_attrs = 'href="' . esc_url( $child['url'] ) . '"';
+				$child_attrs .= ' class="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-bop-blue rounded-md"';
+				if ( ! empty( $child['target'] ) ) {
+					$child_attrs .= ' target="' . esc_attr( $child['target'] ) . '" rel="noopener noreferrer"';
+				}
+				echo '<a ' . $child_attrs . '>' . esc_html( $child['title'] ) . '</a>';
+				echo '</li>';
+			}
+			echo '</ul>';
+		}
+		
+		// Dropdown menu for mobile
+		if ( ( $has_children || $has_mega_menu ) && $menu_type === 'mobile' ) {
+			echo '<ul class="ml-4 mt-2 space-y-1">';
+			// For mobile, flatten mega menu or show dropdown
+			if ( $has_mega_menu ) {
+				foreach ( $item['mega_menu'] as $column ) {
+					foreach ( $column['items'] as $col_item ) {
+						echo '<li>';
+						$child_attrs = 'href="' . esc_url( $col_item['url'] ) . '"';
+						$child_attrs .= ' class="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"';
+						if ( ! empty( $col_item['target'] ) ) {
+							$child_attrs .= ' target="' . esc_attr( $col_item['target'] ) . '" rel="noopener noreferrer"';
+						}
+						echo '<a ' . $child_attrs . '>' . esc_html( $col_item['title'] ) . '</a>';
+						echo '</li>';
+					}
+					foreach ( $column['sections'] as $section ) {
+						foreach ( $section['items'] as $sec_item ) {
+							echo '<li>';
+							$child_attrs = 'href="' . esc_url( $sec_item['url'] ) . '"';
+							$child_attrs .= ' class="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"';
+							if ( ! empty( $sec_item['target'] ) ) {
+								$child_attrs .= ' target="' . esc_attr( $sec_item['target'] ) . '" rel="noopener noreferrer"';
+							}
+							echo '<a ' . $child_attrs . '>' . esc_html( $sec_item['title'] ) . '</a>';
+							echo '</li>';
+						}
+					}
+				}
+			} else {
+				foreach ( $item['children'] as $child ) {
+					echo '<li>';
+					$child_attrs = 'href="' . esc_url( $child['url'] ) . '"';
+					$child_attrs .= ' class="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md"';
+					if ( ! empty( $child['target'] ) ) {
+						$child_attrs .= ' target="' . esc_attr( $child['target'] ) . '" rel="noopener noreferrer"';
+					}
+					echo '<a ' . $child_attrs . '>' . esc_html( $child['title'] ) . '</a>';
+					echo '</li>';
+				}
+			}
+			echo '</ul>';
+		}
+		
+		echo '</li>';
+	}
+	
+	echo '</ul>';
+}
+
+/* ============================================================================
+ * Menu Walker Classes
+ * ============================================================================ */
+
+/**
+ * Mega Menu Walker for Desktop Navigation
+ *
+ * Extends WordPress Walker_Nav_Menu to create a custom navigation structure
+ * that supports mega menus with Tailwind CSS classes.
+ *
+ * @since 1.1.0
+ */
+class BOP_Mega_Menu_Walker extends Walker_Nav_Menu {
+
+	/**
+	 * Start the element output
+	 *
+	 * @param string $output Passed by reference. Used to append additional content.
+	 * @param object $item Menu item data object.
+	 * @param int $depth Depth of menu item. Used for padding.
+	 * @param array $args An array of arguments.
+	 * @param int $id Current item ID.
+	 */
+	public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
+		$indent = ( $depth ) ? str_repeat( "\t", $depth ) : '';
+
+		$classes = empty( $item->classes ) ? array() : (array) $item->classes;
+		$classes[] = 'menu-item-' . $item->ID;
+
+		// Check if item has children for mega menu
+		$has_children = in_array( 'menu-item-has-children', $classes );
+		$has_mega_menu = get_post_meta( $item->ID, '_menu_item_mega_menu', true );
+
+		$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args ) );
+		$class_names = $class_names ? ' class="' . esc_attr( $class_names ) . ( $has_mega_menu ? ' has-mega-menu' : '' ) . '"' : '';
+
+		$id = apply_filters( 'nav_menu_item_id', 'menu-item-' . $item->ID, $item, $args );
+		$id = $id ? ' id="' . esc_attr( $id ) . '"' : '';
+
+		$output .= $indent . '<li' . $id . $class_names . '>';
+
+		$attributes = ! empty( $item->attr_title ) ? ' title="' . esc_attr( $item->attr_title ) . '"' : '';
+		$attributes .= ! empty( $item->target ) ? ' target="' . esc_attr( $item->target ) . '"' : '';
+		$attributes .= ! empty( $item->xfn ) ? ' rel="' . esc_attr( $item->xfn ) . '"' : '';
+		$attributes .= ! empty( $item->url ) ? ' href="' . esc_url( $item->url ) . '"' : '';
+
+		$item_output = isset( $args->before ) ? $args->before : '';
+		$item_output .= '<a' . $attributes . ' class="text-gray-700 hover:text-bop-blue transition-colors duration-200">';
+		$item_output .= ( isset( $args->link_before ) ? $args->link_before : '' ) . apply_filters( 'the_title', $item->title, $item->ID ) . ( isset( $args->link_after ) ? $args->link_after : '' );
+		$item_output .= '</a>';
+
+		// Add mega menu content wrapper if needed
+		if ( $has_mega_menu && $depth === 0 ) {
+			$mega_content = get_post_meta( $item->ID, '_menu_item_mega_content', true );
+			if ( $mega_content ) {
+				$item_output .= '<div class="mega-menu-content hidden">' . wp_kses_post( $mega_content ) . '</div>';
+			}
+		}
+
+		$item_output .= isset( $args->after ) ? $args->after : '';
+
+		$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
+	}
+
+	/**
+	 * End the element output
+	 *
+	 * @param string $output Passed by reference. Used to append additional content.
+	 * @param object $item Page data object.
+	 * @param int $depth Depth of page. Not Used.
+	 * @param array $args An array of arguments.
+	 */
+	public function end_el( &$output, $item, $depth = 0, $args = null ) {
+		$output .= '</li>';
+	}
+}
+
+/**
+ * Mobile Menu Walker
+ *
+ * Extends WordPress Walker_Nav_Menu to create a mobile-friendly navigation
+ * structure with Tailwind CSS classes.
+ *
+ * @since 1.1.0
+ */
+class BOP_Mobile_Menu_Walker extends Walker_Nav_Menu {
+
+	/**
+	 * Start the element output
+	 *
+	 * @param string $output Passed by reference. Used to append additional content.
+	 * @param object $item Menu item data object.
+	 * @param int $depth Depth of menu item. Used for padding.
+	 * @param array $args An array of arguments.
+	 * @param int $id Current item ID.
+	 */
+	public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
+		$indent = ( $depth ) ? str_repeat( "\t", $depth ) : '';
+
+		$classes = empty( $item->classes ) ? array() : (array) $item->classes;
+		$classes[] = 'menu-item-' . $item->ID;
+
+		$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args ) );
+		$class_names = $class_names ? ' class="' . esc_attr( $class_names ) . '"' : '';
+
+		$id = apply_filters( 'nav_menu_item_id', 'menu-item-' . $item->ID, $item, $args );
+		$id = $id ? ' id="' . esc_attr( $id ) . '"' : '';
+
+		$output .= $indent . '<li' . $id . $class_names . '>';
+
+		$attributes = ! empty( $item->attr_title ) ? ' title="' . esc_attr( $item->attr_title ) . '"' : '';
+		$attributes .= ! empty( $item->target ) ? ' target="' . esc_attr( $item->target ) . '"' : '';
+		$attributes .= ! empty( $item->xfn ) ? ' rel="' . esc_attr( $item->xfn ) . '"' : '';
+		$attributes .= ! empty( $item->url ) ? ' href="' . esc_url( $item->url ) . '"' : '';
+
+		$item_output = isset( $args->before ) ? $args->before : '';
+		$item_output .= '<a' . $attributes . ' class="block px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-bop-blue rounded-md transition-colors duration-200">';
+		$item_output .= ( isset( $args->link_before ) ? $args->link_before : '' ) . apply_filters( 'the_title', $item->title, $item->ID ) . ( isset( $args->link_after ) ? $args->link_after : '' );
+		$item_output .= '</a>';
+		$item_output .= isset( $args->after ) ? $args->after : '';
+
+		$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
+	}
+
+	/**
+	 * End the element output
+	 *
+	 * @param string $output Passed by reference. Used to append additional content.
+	 * @param object $item Page data object.
+	 * @param int $depth Depth of page. Not Used.
+	 * @param array $args An array of arguments.
+	 */
+	public function end_el( &$output, $item, $depth = 0, $args = null ) {
+		$output .= '</li>';
+	}
+}
+
+/**
+ * Footer Menu Walker
+ *
+ * Extends WordPress Walker_Nav_Menu to create footer navigation links
+ * with Tailwind CSS classes.
+ *
+ * @since 1.1.0
+ */
+class BOP_Footer_Menu_Walker extends Walker_Nav_Menu {
+
+	/**
+	 * Start the element output
+	 *
+	 * @param string $output Passed by reference. Used to append additional content.
+	 * @param object $item Menu item data object.
+	 * @param int $depth Depth of menu item. Used for padding.
+	 * @param array $args An array of arguments.
+	 * @param int $id Current item ID.
+	 */
+	public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
+		$indent = ( $depth ) ? str_repeat( "\t", $depth ) : '';
+
+		$classes = empty( $item->classes ) ? array() : (array) $item->classes;
+		$classes[] = 'menu-item-' . $item->ID;
+
+		$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args ) );
+		$class_names = $class_names ? ' class="' . esc_attr( $class_names ) . '"' : '';
+
+		$id = apply_filters( 'nav_menu_item_id', 'menu-item-' . $item->ID, $item, $args );
+		$id = $id ? ' id="' . esc_attr( $id ) . '"' : '';
+
+		$output .= $indent . '<li' . $id . $class_names . '>';
+
+		$attributes = ! empty( $item->attr_title ) ? ' title="' . esc_attr( $item->attr_title ) . '"' : '';
+		$attributes .= ! empty( $item->target ) ? ' target="' . esc_attr( $item->target ) . '"' : '';
+		$attributes .= ! empty( $item->xfn ) ? ' rel="' . esc_attr( $item->xfn ) . '"' : '';
+		$attributes .= ! empty( $item->url ) ? ' href="' . esc_url( $item->url ) . '"' : '';
+
+		$item_output = isset( $args->before ) ? $args->before : '';
+		$item_output .= '<a' . $attributes . ' class="text-gray-300 hover:text-white transition-colors duration-200">';
+		$item_output .= ( isset( $args->link_before ) ? $args->link_before : '' ) . apply_filters( 'the_title', $item->title, $item->ID ) . ( isset( $args->link_after ) ? $args->link_after : '' );
+		$item_output .= '</a>';
+		$item_output .= isset( $args->after ) ? $args->after : '';
+
+		$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
+	}
+
+	/**
+	 * End the element output
+	 *
+	 * @param string $output Passed by reference. Used to append additional content.
+	 * @param object $item Page data object.
+	 * @param int $depth Depth of page. Not Used.
+	 * @param array $args An array of arguments.
+	 */
+	public function end_el( &$output, $item, $depth = 0, $args = null ) {
+		$output .= '</li>';
+	}
+}
+

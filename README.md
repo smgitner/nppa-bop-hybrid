@@ -33,6 +33,13 @@ This is the theme for the 2026 NPPA BOP contest, built with Webflow integration 
 - IPTC metadata extraction for image alt text
 - Custom admin menu organization
 - Responsive image support
+- **CSV Import Functionality:**
+  - Import CSV data into posts/pages for list display
+  - Import/update Custom Post Type posts from CSV
+  - Support for nested ACF group fields
+  - Automatic post matching and updating
+  - Featured image import from URLs or file paths
+  - Admin interface under Site Options menu
 
 ## Security
 
@@ -54,6 +61,8 @@ The theme is organized for maintainability:
 - **`inc/template-tags.php`**: Template tag functions for use in theme templates
 - **`inc/template-functions.php`**: Utility functions that enhance WordPress
 - **`inc/customizer.php`**: WordPress Customizer options
+- **`inc/csvlistimport.php`**: CSV import functionality for posts/pages (list display)
+- **`inc/cpt-csv-import.php`**: CSV import functionality for Custom Post Types
 
 All custom functions are thoroughly documented with PHPDoc comments following WordPress coding standards.
 
@@ -82,22 +91,76 @@ This theme follows:
 ### File Structure
 
 ```
-bop-webflow-theme-2025/
+bop-webflow-theme-2026/
 ├── functions.php              # Core theme setup
 ├── inc/
 │   ├── custom.php             # All custom functions (main file)
 │   ├── template-tags.php      # Template tag functions
 │   ├── template-functions.php # Utility functions
-│   └── customizer.php         # Customizer options
+│   ├── customizer.php         # Customizer options
+│   ├── csvlistimport.php      # CSV import for posts/pages (list display)
+│   └── cpt-csv-import.php      # CSV import for Custom Post Types
 ├── partials/                   # Template partials
 ├── page-templates/            # Custom page templates
+│   └── template-csv-list.php  # Template for displaying CSV list data
+├── imports/                    # CSV import files directory
+├── acf-json/                   # ACF field group JSON exports
 ├── unused_backups_off/        # Backup files (not in use, excluded from git)
 └── ...
 ```
 
 **Note**: The `unused_backups_off/` directory contains backup files and old versions that are no longer used. This directory is excluded from version control to keep the repository clean.
 
+## CSV Import Features
+
+### CSV List Import
+Import CSV data into posts/pages to display as lists with featured images. Accessible via:
+- **Admin Location:** Site Options → Import CSV List
+- **Meta Box:** Available on post/page edit screens
+- **Template:** Use "CSV List" page template or `[bop_csv_list]` shortcode
+- **CSV Format:** Requires `division`, `category`, and `category_url` columns
+
+### CPT CSV Import
+Import/update Custom Post Type posts from CSV files. Supports:
+- **Admin Location:** Site Options → Import CPT from CSV
+- **Post Matching:** By title, slug, ID, or custom field
+- **ACF Support:** Handles nested ACF group fields (e.g., `winning_images_first_place_group_first_name`)
+- **Image Import:** Featured images from URLs or file paths
+- **Update/Create:** Update existing posts or create new ones
+
+### CSV Format Examples
+
+**For CSV List Import:**
+```csv
+division,category,category_url
+Still Photojournalism,Photojournalist of the Year - International,photojournalist_of_the_year_international
+```
+
+**For CPT Import (Still Photojournalism example):**
+```csv
+title,winning_images_first_place_group_first_name,winning_images_first_place_group_last_name,winning_images_first_place_group_publication
+Contest Entry,John,Doe,The New York Times
+```
+
 ## Changelog
+
+### 1.2.0 (Current)
+
+**New Features:**
+- Added CSV import functionality for posts/pages (list display)
+- Added CSV import functionality for Custom Post Types
+- Support for nested ACF group fields in CSV imports
+- Featured image import from URLs or file paths
+- Admin interface under Site Options menu
+- CSV List page template and shortcode
+- Automatic post matching and updating
+
+**Code Organization:**
+- Created `inc/csvlistimport.php` for CSV list import functionality
+- Created `inc/cpt-csv-import.php` for CPT CSV import functionality
+- Created `page-templates/template-csv-list.php` for list display
+- Added comprehensive PHPDoc comments throughout new files
+- Enhanced code documentation and inline comments
 
 ### 1.1.0 (November 2025)
 
@@ -113,6 +176,7 @@ bop-webflow-theme-2025/
 - Improved code organization and maintainability
 - Added comprehensive PHPDoc comments throughout
 - Updated `.gitignore` to exclude backup file patterns
+- Renamed theme directory from `bop-webflow-theme-2025` to `bop-webflow-theme-2026`
 
 **Features:**
 - Updated for 2026 BOP contest

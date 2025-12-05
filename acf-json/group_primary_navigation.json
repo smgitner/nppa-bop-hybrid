@@ -1,0 +1,498 @@
+{
+    "key": "group_primary_navigation",
+    "title": "Primary Navigation Menu",
+    "fields": [
+        {
+            "key": "field_primary_menu_items",
+            "label": "Menu Items",
+            "name": "primary_menu_items",
+            "type": "repeater",
+            "instructions": "Add navigation menu items. Enable mega menu for multi-column dropdowns.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "pagination": 0,
+            "min": 0,
+            "max": 0,
+            "collapsed": "field_menu_title",
+            "button_label": "Add Menu Item",
+            "sub_fields": [
+                {
+                    "key": "field_menu_title",
+                    "label": "Menu Title",
+                    "name": "menu_title",
+                    "type": "text",
+                    "instructions": "The text displayed in the navigation menu",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "Home",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": ""
+                },
+                {
+                    "key": "field_menu_url",
+                    "label": "Menu URL",
+                    "name": "menu_url",
+                    "type": "page_link",
+                    "instructions": "Select a page or post from the site, or enter an external URL",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "post_type": [
+                        "page",
+                        "post"
+                    ],
+                    "taxonomy": [],
+                    "allow_archives": 1,
+                    "multiple": 0,
+                    "allow_null": 1,
+                    "return_format": "url"
+                },
+                {
+                    "key": "field_menu_target",
+                    "label": "Open in New Tab",
+                    "name": "menu_target",
+                    "type": "true_false",
+                    "instructions": "Check to open link in a new tab",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": ""
+                },
+                {
+                    "key": "field_menu_type",
+                    "label": "Menu Type",
+                    "name": "menu_type",
+                    "type": "select",
+                    "instructions": "Choose between simple dropdown or mega menu",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "none": "No Dropdown",
+                        "dropdown": "Simple Dropdown",
+                        "mega": "Mega Menu"
+                    },
+                    "default_value": "none",
+                    "allow_null": 0,
+                    "multiple": 0,
+                    "ui": 0,
+                    "return_format": "value",
+                    "ajax": 0,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_dropdown_items",
+                    "label": "Dropdown Items",
+                    "name": "dropdown_items",
+                    "type": "repeater",
+                    "instructions": "Add sub-menu items for simple dropdown",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_menu_type",
+                                "operator": "==",
+                                "value": "dropdown"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "layout": "table",
+                    "pagination": 0,
+                    "min": 0,
+                    "max": 0,
+                    "collapsed": "",
+                    "button_label": "Add Dropdown Item",
+                    "sub_fields": [
+                        {
+                            "key": "field_dropdown_title",
+                            "label": "Title",
+                            "name": "menu_title",
+                            "type": "text",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "placeholder": "Sub Menu Item",
+                            "prepend": "",
+                            "append": "",
+                            "maxlength": ""
+                        },
+                        {
+                            "key": "field_dropdown_url",
+                            "label": "URL",
+                            "name": "menu_url",
+                            "type": "page_link",
+                            "instructions": "Select a page or post from the site",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "post_type": [
+                                "page",
+                                "post"
+                            ],
+                            "taxonomy": [],
+                            "allow_archives": 1,
+                            "multiple": 0,
+                            "allow_null": 1,
+                            "return_format": "url"
+                        },
+                        {
+                            "key": "field_dropdown_target",
+                            "label": "Open in New Tab",
+                            "name": "menu_target",
+                            "type": "true_false",
+                            "instructions": "",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "message": "",
+                            "default_value": 0,
+                            "ui": 1,
+                            "ui_on_text": "",
+                            "ui_off_text": ""
+                        }
+                    ]
+                },
+                {
+                    "key": "field_mega_menu_columns",
+                    "label": "Mega Menu Columns",
+                    "name": "mega_menu_columns",
+                    "type": "repeater",
+                    "instructions": "Add columns for the mega menu (up to 4 columns)",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_menu_type",
+                                "operator": "==",
+                                "value": "mega"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "layout": "block",
+                    "pagination": 0,
+                    "min": 1,
+                    "max": 4,
+                    "collapsed": "field_column_title",
+                    "button_label": "Add Column",
+                    "sub_fields": [
+                        {
+                            "key": "field_column_title",
+                            "label": "Column Title",
+                            "name": "column_title",
+                            "type": "text",
+                            "instructions": "The header title for this column",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "placeholder": "DIVISION",
+                            "prepend": "",
+                            "append": "",
+                            "maxlength": ""
+                        },
+                        {
+                            "key": "field_column_items",
+                            "label": "Column Items",
+                            "name": "column_items",
+                            "type": "repeater",
+                            "instructions": "Add items to this column",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "layout": "block",
+                            "pagination": 0,
+                            "min": 0,
+                            "max": 0,
+                            "collapsed": "field_item_title",
+                            "button_label": "Add Item",
+                            "sub_fields": [
+                                {
+                                    "key": "field_item_title",
+                                    "label": "Item Title",
+                                    "name": "item_title",
+                                    "type": "text",
+                                    "instructions": "",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "default_value": "",
+                                    "placeholder": "Still Photojournalism",
+                                    "prepend": "",
+                                    "append": "",
+                                    "maxlength": ""
+                                },
+                                {
+                                    "key": "field_item_url",
+                                    "label": "Item URL",
+                                    "name": "item_url",
+                                    "type": "page_link",
+                                    "instructions": "Select a page or post from the site",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "post_type": [
+                                        "page",
+                                        "post"
+                                    ],
+                                    "taxonomy": [],
+                                    "allow_archives": 1,
+                                    "multiple": 0,
+                                    "allow_null": 1,
+                                    "return_format": "url"
+                                },
+                                {
+                                    "key": "field_item_target",
+                                    "label": "Open in New Tab",
+                                    "name": "item_target",
+                                    "type": "true_false",
+                                    "instructions": "",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "message": "",
+                                    "default_value": 0,
+                                    "ui": 1,
+                                    "ui_on_text": "",
+                                    "ui_off_text": ""
+                                },
+                                {
+                                    "key": "field_item_active",
+                                    "label": "Highlight This Item",
+                                    "name": "item_active",
+                                    "type": "true_false",
+                                    "instructions": "Highlight this item in the mega menu",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "message": "",
+                                    "default_value": 0,
+                                    "ui": 1,
+                                    "ui_on_text": "",
+                                    "ui_off_text": ""
+                                }
+                            ]
+                        },
+                        {
+                            "key": "field_column_sections",
+                            "label": "Column Sections",
+                            "name": "column_sections",
+                            "type": "repeater",
+                            "instructions": "Optional: Add sub-sections within this column (e.g., \"PORTRAIT\" section)",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "layout": "block",
+                            "pagination": 0,
+                            "min": 0,
+                            "max": 0,
+                            "collapsed": "field_section_title",
+                            "button_label": "Add Section",
+                            "sub_fields": [
+                                {
+                                    "key": "field_section_title",
+                                    "label": "Section Title",
+                                    "name": "section_title",
+                                    "type": "text",
+                                    "instructions": "Sub-section header (e.g., \"PORTRAIT\", \"OTHER\")",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "default_value": "",
+                                    "placeholder": "PORTRAIT",
+                                    "prepend": "",
+                                    "append": "",
+                                    "maxlength": ""
+                                },
+                                {
+                                    "key": "field_section_items",
+                                    "label": "Section Items",
+                                    "name": "section_items",
+                                    "type": "repeater",
+                                    "instructions": "Add items to this sub-section",
+                                    "required": 0,
+                                    "conditional_logic": 0,
+                                    "wrapper": {
+                                        "width": "",
+                                        "class": "",
+                                        "id": ""
+                                    },
+                                    "layout": "block",
+                                    "pagination": 0,
+                                    "min": 0,
+                                    "max": 0,
+                                    "collapsed": "field_section_item_title",
+                                    "button_label": "Add Section Item",
+                                    "sub_fields": [
+                                        {
+                                            "key": "field_section_item_title",
+                                            "label": "Item Title",
+                                            "name": "item_title",
+                                            "type": "text",
+                                            "instructions": "",
+                                            "required": 0,
+                                            "conditional_logic": 0,
+                                            "wrapper": {
+                                                "width": "",
+                                                "class": "",
+                                                "id": ""
+                                            },
+                                            "default_value": "",
+                                            "placeholder": "Portrait/Personality",
+                                            "prepend": "",
+                                            "append": "",
+                                            "maxlength": ""
+                                        },
+                                        {
+                                            "key": "field_section_item_url",
+                                            "label": "Item URL",
+                                            "name": "item_url",
+                                            "type": "page_link",
+                                            "instructions": "Select a page or post from the site",
+                                            "required": 0,
+                                            "conditional_logic": 0,
+                                            "wrapper": {
+                                                "width": "",
+                                                "class": "",
+                                                "id": ""
+                                            },
+                                            "post_type": [
+                                                "page",
+                                                "post"
+                                            ],
+                                            "taxonomy": [],
+                                            "allow_archives": 1,
+                                            "multiple": 0,
+                                            "allow_null": 1,
+                                            "return_format": "url"
+                                        },
+                                        {
+                                            "key": "field_section_item_target",
+                                            "label": "Open in New Tab",
+                                            "name": "item_target",
+                                            "type": "true_false",
+                                            "instructions": "",
+                                            "required": 0,
+                                            "conditional_logic": 0,
+                                            "wrapper": {
+                                                "width": "",
+                                                "class": "",
+                                                "id": ""
+                                            },
+                                            "message": "",
+                                            "default_value": 0,
+                                            "ui": 1,
+                                            "ui_on_text": "",
+                                            "ui_off_text": ""
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "site-options"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Manage the primary navigation menu from Site Options"
+}

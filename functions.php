@@ -369,3 +369,23 @@ require get_template_directory() . '/inc/customizer.php';
  * @see /inc/custom.php
  */
 require get_template_directory() . '/inc/custom.php';
+
+/**
+ * CSV List Import functionality
+ *
+ * Contains functions for importing CSV data into posts and displaying
+ * it as a list with matching post names and featured images.
+ *
+ * @see /inc/csvlistimport.php
+ */
+require get_template_directory() . '/inc/csvlistimport.php';
+
+/**
+ * CPT CSV Import functionality
+ *
+ * Contains functions for importing CSV data into Custom Post Types,
+ * updating existing posts or creating new ones.
+ *
+ * @see /inc/cpt-csv-import.php
+ */
+require get_template_directory() . '/inc/cpt-csv-import.php';
