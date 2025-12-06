@@ -5,7 +5,7 @@ WordPress theme for the 2026 NPPA Best of Photojournalism (BOP) contest.
 ## Theme Information
 
 - **Theme Name:** BOP Theme 2026
-- **Version:** 1.1.0
+- **Version:** 1.3.0
 - **Author:** SG Media Group
 - **Author URI:** http://sgmediagroup.com
 - **Theme URI:** http://bop.nppa.org
@@ -36,10 +36,19 @@ This is the theme for the 2026 NPPA BOP contest, built with Webflow integration 
 - **CSV Import Functionality:**
   - Import CSV data into posts/pages for list display
   - Import/update Custom Post Type posts from CSV
+  - Import mega menu structure from CSV
   - Support for nested ACF group fields
   - Automatic post matching and updating
   - Featured image import from URLs or file paths
+  - Desktop file upload support (upload CSV files directly from computer)
+  - Example CSV file upload/download for admins
   - Admin interface under Site Options menu
+- **Winners Display:**
+  - Display all winners from all categories
+  - Organized by category with places (1st, 2nd, 3rd, HM) within each category
+  - Category featured images (500px wide)
+  - Links to entry pages
+  - Responsive design with minimum 2rem font size
 
 ## Security
 
@@ -144,7 +153,27 @@ Contest Entry,John,Doe,The New York Times
 
 ## Changelog
 
-### 1.2.0 (Current)
+### 1.3.0 (Current)
+
+**New Features:**
+- **Winners Display Page**: New `page-winners.php` template that displays all winners from all categories, organized by category with places (1st, 2nd, 3rd, HM) shown within each category
+- **Example CSV Upload**: Admins can now upload example CSV files for download on all CSV import pages (Mega Menu, CSV List, CPT Import)
+- **CSV File Upload**: All CSV import pages now support direct file uploads from user's desktop in addition to server file paths
+- **Standardized Headers/Footers**: All page and single post templates now use consistent header and footer
+- **Debug Log Path Fix**: Automatic fix for production server paths in debug log plugins for local development
+
+**Improvements:**
+- Enhanced CSV import with desktop file upload support
+- Improved winners display with category grouping and featured images
+- Better error handling for JSON responses during publishing
+- Fixed REST API accessibility issues
+
+**Code Organization:**
+- Added `bop_display_all_winners()` function to display all winners by category
+- Enhanced CSV import pages with example file upload functionality
+- Standardized all template headers and footers
+
+### 1.2.0
 
 **New Features:**
 - Added CSV import functionality for posts/pages (list display)

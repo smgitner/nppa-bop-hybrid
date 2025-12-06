@@ -113,12 +113,38 @@ function bop_cpt_csv_import_admin_page_callback() {
 	// Initialize message variables for user feedback
 	$message = '';
 	$message_type = '';
+	$example_upload_message = '';
 	$import_stats = array(
 		'created' => 0,
 		'updated' => 0,
 		'skipped' => 0,
 		'errors' => 0,
 	);
+
+	// Handle example CSV upload
+	if ( isset( $_POST['upload_example_csv'] ) && isset( $_FILES['example_csv_file'] ) && ! empty( $_FILES['example_csv_file']['tmp_name'] ) ) {
+		check_admin_referer( 'bop_upload_example_csv_cpt' );
+		
+		$uploaded_file = $_FILES['example_csv_file']['tmp_name'];
+		$file_name = sanitize_file_name( $_FILES['example_csv_file']['name'] );
+		
+		// Create uploads directory if it doesn't exist
+		$uploads_dir = wp_upload_dir();
+		$example_dir = $uploads_dir['basedir'] . '/csv-examples';
+		if ( ! is_dir( $example_dir ) ) {
+			wp_mkdir_p( $example_dir );
+			file_put_contents( $example_dir . '/index.php', '<?php // Silence is golden' );
+		}
+		
+		// Move uploaded file
+		$destination = $example_dir . '/cpt-import-example.csv';
+		if ( move_uploaded_file( $uploaded_file, $destination ) ) {
+			update_option( 'bop_cpt_csv_example_csv', $uploads_dir['baseurl'] . '/csv-examples/cpt-import-example.csv' );
+			$example_upload_message = '<div class="notice notice-success is-dismissible"><p>Example CSV file uploaded successfully!</p></div>';
+		} else {
+			$example_upload_message = '<div class="notice notice-error is-dismissible"><p>Error uploading example CSV file.</p></div>';
+		}
+	}
 
 	// Handle CSV import form submission
 	if ( isset( $_POST['bop_import_cpt_csv'] ) && isset( $_FILES['csv_file'] ) && ! empty( $_FILES['csv_file']['tmp_name'] ) ) {
@@ -173,6 +199,10 @@ function bop_cpt_csv_import_admin_page_callback() {
 	<div class="wrap">
 		<h1>Import Custom Post Type from CSV</h1>
 		
+		<?php if ( $example_upload_message ) : ?>
+			<?php echo $example_upload_message; ?>
+		<?php endif; ?>
+		
 		<?php if ( $message ) : ?>
 			<div class="notice notice-<?php echo esc_attr( $message_type === 'success' ? 'success' : 'error' ); ?> is-dismissible">
 				<p><?php echo esc_html( $message ); ?></p>
@@ -216,6 +246,23 @@ function bop_cpt_csv_import_admin_page_callback() {
 				<li>If no match is found, a new post will be created</li>
 				<li>Empty rows will be skipped automatically</li>
 			</ul>
+			
+			<?php
+			// Get example CSV URL
+			$example_csv_url = get_option( 'bop_cpt_csv_example_csv' );
+			?>
+			
+			<h3 style="margin-top: 20px;">Example CSV File</h3>
+			<?php if ( $example_csv_url ) : ?>
+				<p><a href="<?php echo esc_url( $example_csv_url ); ?>" class="button" download>Download Example CSV</a></p>
+			<?php endif; ?>
+			
+			<form method="post" enctype="multipart/form-data" style="margin-top: 10px;">
+				<?php wp_nonce_field( 'bop_upload_example_csv_cpt' ); ?>
+				<input type="file" name="example_csv_file" id="example_csv_file" accept=".csv">
+				<?php submit_button( 'Upload Example CSV', 'secondary', 'upload_example_csv', false ); ?>
+				<p class="description">Upload an example CSV file that users can download as a template.</p>
+			</form>
 		</div>
 
 		<form method="post" enctype="multipart/form-data" class="card" style="margin-top: 20px;">

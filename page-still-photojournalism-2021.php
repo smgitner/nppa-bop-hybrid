@@ -12,7 +12,7 @@
  * @package bop_theme
  */
 
-get_header('bopwins');
+get_header();
 ?>
 
 <main class="main-sitecontent">

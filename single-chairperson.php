@@ -3,7 +3,7 @@
  *
  * @package bop_theme_2026
  */
-get_header('boppages');?>
+get_header(); ?>
 
 <main class="main-sitecontent">
 

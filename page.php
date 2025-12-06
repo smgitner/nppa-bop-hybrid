@@ -12,7 +12,7 @@
  * @package bop_theme
  */
 
-get_header('bopwins');
+get_header();
 ?>
 
 <main class="main-sitecontent">
@@ -291,7 +291,6 @@ get_header('bopwins');
 
 
 <!-- BOTTOM OF PAGE -->
-<?php get_template_part( 'partials/footer/wrapper-footer'); ?>
 
 
 

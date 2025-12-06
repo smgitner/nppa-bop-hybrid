@@ -55,8 +55,22 @@ function bop_csv_import_meta_box_callback( $post ) {
 	?>
 	<div class="bop-csv-import-wrapper">
 		<p>
+			<label for="bop_csv_file_upload">
+				<strong><?php esc_html_e( 'CSV File:', 'bop_theme' ); ?></strong>
+			</label>
+			<br>
+			<input type="file" 
+			       id="bop_csv_file_upload" 
+			       name="bop_csv_file_upload" 
+			       accept=".csv" 
+			       class="regular-text">
+			<br>
+			<small><?php esc_html_e( 'Upload a CSV file from your computer.', 'bop_theme' ); ?></small>
+		</p>
+		
+		<p>
 			<label for="bop_csv_file_path">
-				<strong><?php esc_html_e( 'CSV File Path:', 'bop_theme' ); ?></strong>
+				<strong><?php esc_html_e( 'Or CSV File Path:', 'bop_theme' ); ?></strong>
 			</label>
 			<br>
 			<input type="text" 
@@ -66,7 +80,7 @@ function bop_csv_import_meta_box_callback( $post ) {
 			       class="large-text" 
 			       placeholder="<?php esc_attr_e( 'e.g., imports/bop_winners_with_category_urls.csv', 'bop_theme' ); ?>">
 			<br>
-			<small><?php esc_html_e( 'Enter the path relative to theme directory (e.g., imports/file.csv) or absolute path.', 'bop_theme' ); ?></small>
+			<small><?php esc_html_e( 'Alternatively, enter the path relative to theme directory (e.g., imports/file.csv) or absolute path.', 'bop_theme' ); ?></small>
 		</p>
 		
 		<p>
@@ -115,26 +129,38 @@ function bop_csv_import_meta_box_callback( $post ) {
 	jQuery(document).ready(function($) {
 		$('#bop_import_csv_btn').on('click', function(e) {
 			e.preventDefault();
+			var fileInput = $('#bop_csv_file_upload')[0];
 			var filePath = $('#bop_csv_file_path').val();
 			var postId = <?php echo intval( $post->ID ); ?>;
 			var statusEl = $('#bop_csv_import_status');
 			
-			if (!filePath) {
-				statusEl.html('<span style="color: red;">Please enter a file path.</span>');
+			// Check if file is selected or path is entered
+			if (!fileInput.files.length && !filePath) {
+				statusEl.html('<span style="color: red;">Please select a CSV file or enter a file path.</span>');
 				return;
 			}
 			
 			statusEl.html('<span style="color: blue;">Importing...</span>');
 			
+			// Prepare form data
+			var formData = new FormData();
+			formData.append('action', 'bop_import_csv');
+			formData.append('post_id', postId);
+			formData.append('nonce', '<?php echo wp_create_nonce( 'bop_csv_import_ajax' ); ?>');
+			
+			// Add file if selected
+			if (fileInput.files.length) {
+				formData.append('csv_file', fileInput.files[0]);
+			} else if (filePath) {
+				formData.append('file_path', filePath);
+			}
+			
 			$.ajax({
 				url: ajaxurl,
 				type: 'POST',
-				data: {
-					action: 'bop_import_csv',
-					post_id: postId,
-					file_path: filePath,
-					nonce: '<?php echo wp_create_nonce( 'bop_csv_import_ajax' ); ?>'
-				},
+				data: formData,
+				processData: false,
+				contentType: false,
 				success: function(response) {
 					if (response.success) {
 						statusEl.html('<span style="color: green;">Import successful! ' + response.data.count + ' rows imported. Please refresh the page.</span>');
@@ -208,21 +234,32 @@ function bop_ajax_import_csv() {
 	}
 	
 	$post_id = isset( $_POST['post_id'] ) ? intval( $_POST['post_id'] ) : 0;
-	$file_path = isset( $_POST['file_path'] ) ? sanitize_text_field( $_POST['file_path'] ) : '';
+	$csv_file_path = null;
 	
-	if ( ! $post_id || ! $file_path ) {
-		wp_send_json_error( 'Missing required parameters' );
+	if ( ! $post_id ) {
+		wp_send_json_error( 'Post ID is required' );
 	}
 	
-	// Resolve file path
-	$resolved_path = bop_resolve_csv_file_path( $file_path );
+	// Check if file was uploaded
+	if ( isset( $_FILES['csv_file'] ) && ! empty( $_FILES['csv_file']['tmp_name'] ) ) {
+		// Use uploaded file
+		$csv_file_path = $_FILES['csv_file']['tmp_name'];
+	} elseif ( isset( $_POST['file_path'] ) && ! empty( $_POST['file_path'] ) ) {
+		// Fallback to file path (for backward compatibility)
+		$file_path = sanitize_text_field( $_POST['file_path'] );
+		$csv_file_path = bop_resolve_csv_file_path( $file_path );
+	}
 	
-	if ( ! $resolved_path || ! file_exists( $resolved_path ) ) {
-		wp_send_json_error( 'File not found: ' . $file_path );
+	if ( empty( $csv_file_path ) ) {
+		wp_send_json_error( 'Please select a CSV file to upload or enter a file path' );
+	}
+	
+	if ( ! file_exists( $csv_file_path ) ) {
+		wp_send_json_error( 'File not found' );
 	}
 	
 	// Import CSV
-	$result = bop_import_csv_to_post( $resolved_path, $post_id );
+	$result = bop_import_csv_to_post( $csv_file_path, $post_id );
 	
 	if ( is_wp_error( $result ) ) {
 		wp_send_json_error( $result->get_error_message() );
@@ -670,41 +707,76 @@ function bop_csv_import_admin_page_callback() {
 	$message = '';
 	$message_type = '';
 	$imported_count = 0;
+	$example_upload_message = '';
+
+	// Handle example CSV upload
+	if ( isset( $_POST['upload_example_csv'] ) && isset( $_FILES['example_csv_file'] ) && ! empty( $_FILES['example_csv_file']['tmp_name'] ) ) {
+		check_admin_referer( 'bop_upload_example_csv_list' );
+		
+		$uploaded_file = $_FILES['example_csv_file']['tmp_name'];
+		$file_name = sanitize_file_name( $_FILES['example_csv_file']['name'] );
+		
+		// Create uploads directory if it doesn't exist
+		$uploads_dir = wp_upload_dir();
+		$example_dir = $uploads_dir['basedir'] . '/csv-examples';
+		if ( ! is_dir( $example_dir ) ) {
+			wp_mkdir_p( $example_dir );
+			file_put_contents( $example_dir . '/index.php', '<?php // Silence is golden' );
+		}
+		
+		// Move uploaded file
+		$destination = $example_dir . '/csv-list-example.csv';
+		if ( move_uploaded_file( $uploaded_file, $destination ) ) {
+			update_option( 'bop_csv_list_example_csv', $uploads_dir['baseurl'] . '/csv-examples/csv-list-example.csv' );
+			$example_upload_message = '<div class="notice notice-success is-dismissible"><p>Example CSV file uploaded successfully!</p></div>';
+		} else {
+			$example_upload_message = '<div class="notice notice-error is-dismissible"><p>Error uploading example CSV file.</p></div>';
+		}
+	}
 
 	// Handle CSV import
 	if ( isset( $_POST['bop_import_csv'] ) ) {
 		check_admin_referer( 'bop_import_csv_admin' );
 
-		$file_path = isset( $_POST['csv_file_path'] ) ? sanitize_text_field( $_POST['csv_file_path'] ) : '';
 		$post_id = isset( $_POST['target_post_id'] ) ? intval( $_POST['target_post_id'] ) : 0;
+		$csv_file_path = null;
 
-		if ( empty( $file_path ) ) {
-			$message = 'Error: Please enter a CSV file path.';
+		// Check if file was uploaded
+		if ( isset( $_FILES['csv_file'] ) && ! empty( $_FILES['csv_file']['tmp_name'] ) ) {
+			// Use uploaded file
+			$csv_file_path = $_FILES['csv_file']['tmp_name'];
+		} elseif ( isset( $_POST['csv_file_path'] ) && ! empty( $_POST['csv_file_path'] ) ) {
+			// Fallback to file path (for backward compatibility)
+			$file_path = sanitize_text_field( $_POST['csv_file_path'] );
+			$csv_file_path = bop_resolve_csv_file_path( $file_path );
+		}
+
+		if ( empty( $csv_file_path ) ) {
+			$message = 'Error: Please select a CSV file to upload or enter a file path.';
+			$message_type = 'error';
+		} elseif ( ! file_exists( $csv_file_path ) ) {
+			$message = 'Error: File not found.';
 			$message_type = 'error';
 		} elseif ( empty( $post_id ) ) {
 			$message = 'Error: Please select a target post or page.';
 			$message_type = 'error';
 		} else {
-			// Resolve file path
-			$resolved_path = bop_resolve_csv_file_path( $file_path );
+			// Import CSV
+			$result = bop_import_csv_to_post( $csv_file_path, $post_id );
 
-			if ( ! $resolved_path || ! file_exists( $resolved_path ) ) {
-				$message = 'Error: File not found: ' . esc_html( $file_path );
+			if ( is_wp_error( $result ) ) {
+				$message = 'Error: ' . $result->get_error_message();
 				$message_type = 'error';
 			} else {
-				// Import CSV
-				$result = bop_import_csv_to_post( $resolved_path, $post_id );
-
-				if ( is_wp_error( $result ) ) {
-					$message = 'Error: ' . $result->get_error_message();
-					$message_type = 'error';
-				} else {
-					$imported_count = count( $result );
-					$message = 'CSV imported successfully! ' . $imported_count . ' rows imported into "' . get_the_title( $post_id ) . '".';
-					$message_type = 'success';
-					
-					// Also save the file path
-					update_post_meta( $post_id, '_bop_csv_file_path', $file_path );
+				$imported_count = count( $result );
+				$message = 'CSV imported successfully! ' . $imported_count . ' rows imported into "' . get_the_title( $post_id ) . '".';
+				$message_type = 'success';
+				
+				// Save file info if uploaded
+				if ( isset( $_FILES['csv_file'] ) && ! empty( $_FILES['csv_file']['name'] ) ) {
+					update_post_meta( $post_id, '_bop_csv_file_path', 'uploaded: ' . sanitize_file_name( $_FILES['csv_file']['name'] ) );
+				} elseif ( isset( $_POST['csv_file_path'] ) ) {
+					update_post_meta( $post_id, '_bop_csv_file_path', sanitize_text_field( $_POST['csv_file_path'] ) );
 				}
 			}
 		}
@@ -721,6 +793,10 @@ function bop_csv_import_admin_page_callback() {
 	?>
 	<div class="wrap">
 		<h1>Import CSV List</h1>
+		
+		<?php if ( $example_upload_message ) : ?>
+			<?php echo $example_upload_message; ?>
+		<?php endif; ?>
 		
 		<?php if ( $message ) : ?>
 			<div class="notice notice-<?php echo esc_attr( $message_type === 'success' ? 'success' : 'error' ); ?> is-dismissible">
@@ -746,25 +822,54 @@ function bop_csv_import_admin_page_callback() {
 				<li><strong>category_url</strong> - The URL slug used to match posts</li>
 			</ul>
 			<p><strong>Note:</strong> The first row should be headers and will be skipped. Duplicate rows will be automatically removed.</p>
+			
+			<?php
+			// Get example CSV URL
+			$example_csv_url = get_option( 'bop_csv_list_example_csv' );
+			?>
+			
+			<h3 style="margin-top: 20px;">Example CSV File</h3>
+			<?php if ( $example_csv_url ) : ?>
+				<p><a href="<?php echo esc_url( $example_csv_url ); ?>" class="button" download>Download Example CSV</a></p>
+			<?php endif; ?>
+			
+			<form method="post" enctype="multipart/form-data" style="margin-top: 10px;">
+				<?php wp_nonce_field( 'bop_upload_example_csv_list' ); ?>
+				<input type="file" name="example_csv_file" id="example_csv_file" accept=".csv">
+				<?php submit_button( 'Upload Example CSV', 'secondary', 'upload_example_csv', false ); ?>
+				<p class="description">Upload an example CSV file that users can download as a template.</p>
+			</form>
 		</div>
 
-		<form method="post" class="card" style="margin-top: 20px;">
+		<form method="post" enctype="multipart/form-data" class="card" style="margin-top: 20px;">
 			<?php wp_nonce_field( 'bop_import_csv_admin' ); ?>
 			
 			<table class="form-table">
 				<tr>
 					<th scope="row">
-						<label for="csv_file_path">CSV File Path</label>
+						<label for="csv_file">CSV File</label>
+					</th>
+					<td>
+						<input type="file" 
+						       name="csv_file" 
+						       id="csv_file" 
+						       accept=".csv" 
+						       class="regular-text">
+						<p class="description">Upload a CSV file from your computer. Maximum file size: <?php echo esc_html( size_format( wp_max_upload_size() ) ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">
+						<label for="csv_file_path">Or CSV File Path</label>
 					</th>
 					<td>
 						<input type="text" 
 						       name="csv_file_path" 
 						       id="csv_file_path" 
-						       value="<?php echo isset( $_POST['csv_file_path'] ) ? esc_attr( $_POST['csv_file_path'] ) : 'imports/bop_winners_with_category_urls.csv'; ?>" 
+						       value="<?php echo isset( $_POST['csv_file_path'] ) ? esc_attr( $_POST['csv_file_path'] ) : ''; ?>" 
 						       class="large-text" 
-						       placeholder="e.g., imports/bop_winners_with_category_urls.csv"
-						       required>
-						<p class="description">Enter the path relative to theme directory (e.g., <code>imports/file.csv</code>) or absolute path.</p>
+						       placeholder="e.g., imports/bop_winners_with_category_urls.csv">
+						<p class="description">Alternatively, enter the path relative to theme directory (e.g., <code>imports/file.csv</code>) or absolute path.</p>
 					</td>
 				</tr>
 				<tr>
@@ -792,7 +897,7 @@ function bop_csv_import_admin_page_callback() {
 		<div class="card" style="margin-top: 20px;">
 			<h2>How to Use</h2>
 			<ol>
-				<li>Enter the path to your CSV file (relative to theme directory or absolute path)</li>
+				<li>Upload a CSV file from your computer, or enter the path to a CSV file on the server</li>
 				<li>Select the post or page where you want to import the CSV data</li>
 				<li>Click "Import CSV" to import the data</li>
 				<li>Edit the selected post/page and choose the "CSV List" template to display the imported list</li>

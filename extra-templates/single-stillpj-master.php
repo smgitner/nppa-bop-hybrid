@@ -5,7 +5,7 @@
  * @package bop_theme_2026
  */
 
-get_header('bopwins'); ?>
+get_header(); ?>
 
 <!-- TOP OF STORY POST PAGE -->
 

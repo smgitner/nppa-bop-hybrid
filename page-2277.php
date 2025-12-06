@@ -12,7 +12,7 @@
  * @package bop_theme
  */
 
-get_header('boppages');
+get_header();
 ?>
 
 <main class="main-sitecontent">

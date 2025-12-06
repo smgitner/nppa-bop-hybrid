@@ -5,7 +5,7 @@
  * @package nppa_bop_theme
  */
 
-get_header('bopwins'); ?>
+get_header(); ?>
 
 <!-- TOP OF STORY POST PAGE -->
 

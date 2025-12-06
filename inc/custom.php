@@ -981,6 +981,32 @@ function bop_mega_menu_import_page_callback() {
 
 	$message = '';
 	$message_type = '';
+	$example_upload_message = '';
+
+	// Handle example CSV upload
+	if ( isset( $_POST['upload_example_csv'] ) && isset( $_FILES['example_csv_file'] ) && ! empty( $_FILES['example_csv_file']['tmp_name'] ) ) {
+		check_admin_referer( 'bop_upload_example_csv_mega_menu' );
+		
+		$uploaded_file = $_FILES['example_csv_file']['tmp_name'];
+		$file_name = sanitize_file_name( $_FILES['example_csv_file']['name'] );
+		
+		// Create uploads directory if it doesn't exist
+		$uploads_dir = wp_upload_dir();
+		$example_dir = $uploads_dir['basedir'] . '/csv-examples';
+		if ( ! is_dir( $example_dir ) ) {
+			wp_mkdir_p( $example_dir );
+			file_put_contents( $example_dir . '/index.php', '<?php // Silence is golden' );
+		}
+		
+		// Move uploaded file
+		$destination = $example_dir . '/mega-menu-example.csv';
+		if ( move_uploaded_file( $uploaded_file, $destination ) ) {
+			update_option( 'bop_mega_menu_example_csv', $uploads_dir['baseurl'] . '/csv-examples/mega-menu-example.csv' );
+			$example_upload_message = '<div class="notice notice-success is-dismissible"><p>Example CSV file uploaded successfully!</p></div>';
+		} else {
+			$example_upload_message = '<div class="notice notice-error is-dismissible"><p>Error uploading example CSV file.</p></div>';
+		}
+	}
 
 	// Handle file upload
 	if ( isset( $_POST['bop_import_csv'] ) && isset( $_FILES['csv_file'] ) && ! empty( $_FILES['csv_file']['tmp_name'] ) ) {
@@ -1009,8 +1035,12 @@ function bop_mega_menu_import_page_callback() {
 		}
 	}
 	?>
-	<div class="wrap">
+		<div class="wrap">
 		<h1>Import Mega Menu from CSV</h1>
+		
+		<?php if ( $example_upload_message ) : ?>
+			<?php echo $example_upload_message; ?>
+		<?php endif; ?>
 		
 		<?php if ( $message ) : ?>
 			<div class="notice notice-<?php echo esc_attr( $message_type === 'success' ? 'success' : 'error' ); ?> is-dismissible">
@@ -1033,6 +1063,23 @@ function bop_mega_menu_import_page_callback() {
 				<li><strong>category_url</strong> - The URL slug (will be converted to full URL)</li>
 			</ul>
 			<p><strong>Note:</strong> The first row should be headers and will be skipped.</p>
+			
+			<?php
+			// Get example CSV URL
+			$example_csv_url = get_option( 'bop_mega_menu_example_csv' );
+			?>
+			
+			<h3 style="margin-top: 20px;">Example CSV File</h3>
+			<?php if ( $example_csv_url ) : ?>
+				<p><a href="<?php echo esc_url( $example_csv_url ); ?>" class="button" download>Download Example CSV</a></p>
+			<?php endif; ?>
+			
+			<form method="post" enctype="multipart/form-data" style="margin-top: 10px;">
+				<?php wp_nonce_field( 'bop_upload_example_csv_mega_menu' ); ?>
+				<input type="file" name="example_csv_file" id="example_csv_file" accept=".csv">
+				<?php submit_button( 'Upload Example CSV', 'secondary', 'upload_example_csv', false ); ?>
+				<p class="description">Upload an example CSV file that users can download as a template.</p>
+			</form>
 		</div>
 
 		<form method="post" enctype="multipart/form-data" class="card" style="margin-top: 20px;">
@@ -1082,11 +1129,94 @@ if ( function_exists( 'acf_add_options_page' ) ) {
 		'page_title'  => 'Site Options',
 		'menu_title'  => 'Site Options',
 		'menu_slug'   => 'site-options',
-		'capability'  => 'edit_posts',
+		'capability'  => 'manage_options',
 		'icon_url'    => 'dashicons-admin-settings',
 		'position'    => 30,
 	) );
 }
+
+/**
+ * Ensure Primary Navigation Menu field group is accessible
+ * This ensures the field group from JSON is properly registered in ACF
+ *
+ * @since 1.1.0
+ */
+add_action( 'acf/init', function() {
+	// Check if the field group exists in the database
+	$field_group = acf_get_field_group( 'group_primary_navigation' );
+	
+	// If it doesn't exist in DB but JSON file exists, trigger sync
+	if ( ! $field_group ) {
+		$json_file = get_stylesheet_directory() . '/acf-json/group_primary_navigation.json';
+		if ( file_exists( $json_file ) ) {
+			// ACF will automatically sync on next page load
+			// This just ensures the JSON is recognized
+			acf_get_local_field_groups();
+		}
+	}
+} );
+
+/**
+ * Fix Debug Log Manager path for local development
+ * Updates debug log path if it contains production server path
+ * Only runs once to prevent infinite loops
+ *
+ * @since 1.1.0
+ */
+
+/**
+ * Fix debug log paths from production server to local paths
+ * Only runs once to prevent infinite loops
+ * Skips during AJAX/REST requests to prevent JSON response issues
+ *
+ * @since 1.1.0
+ */
+add_action( 'admin_init', function() {
+	static $fixed = false;
+	
+	// Skip during AJAX requests, REST API, and admin-ajax to prevent JSON response issues
+	if ( wp_doing_ajax() || 
+	     ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ||
+	     ( defined( 'WP_CLI' ) && WP_CLI ) ) {
+		return;
+	}
+	
+	// Only run once per request
+	if ( $fixed ) {
+		return;
+	}
+	
+	$debug_log_path = get_option( 'debug_log_manager_file_path' );
+	
+	// Check if the path contains production server path
+	if ( $debug_log_path && strpos( $debug_log_path, '/home/customer/www/bop.nppa.org' ) !== false ) {
+		// Generate new local path
+		$uploads = @wp_upload_dir();
+		if ( $uploads && ( ! isset( $uploads['error'] ) || empty( $uploads['error'] ) ) ) {
+			$uploads_path = $uploads['basedir'] . '/debug-log-manager';
+			$plain_domain = str_replace( array( ".", "-" ), "", sanitize_text_field( $_SERVER['SERVER_NAME'] ?? 'localhost' ) );
+			$unique_key = date( 'YmdHi' ) . rand(12345678, 87654321);
+			$new_debug_log_path = $uploads_path . '/' . $plain_domain . '_' . $unique_key . '_debug.log';
+			
+			// Update the option with local path (suppress errors)
+			@update_option( 'debug_log_manager_file_path', $new_debug_log_path, false );
+			
+			// Ensure directory exists (suppress errors)
+			if ( ! is_dir( $uploads_path ) ) {
+				@wp_mkdir_p( $uploads_path );
+				@file_put_contents( $uploads_path . '/index.php', '<?php // Nothing to show here' );
+			}
+		}
+	}
+	
+	// Fix Error Log Viewer global variable
+	global $rrrlgvwr_php_error_path;
+	if ( isset( $rrrlgvwr_php_error_path ) && strpos( $rrrlgvwr_php_error_path, '/home/customer/www/bop.nppa.org' ) !== false ) {
+		$rrrlgvwr_php_error_path = WP_CONTENT_DIR . '/debug.log';
+	}
+	
+	$fixed = true;
+}, 1 );
 
 /**
  * Rename Site Options submenu to "Nav Menu"
@@ -1173,7 +1303,7 @@ function bop_add_site_options_dashboard() {
 		$parent_slug,
 		'Site Options Dashboard',
 		'Dashboard',
-		'edit_posts',
+		'manage_options',
 		'site-options-dashboard',
 		'bop_site_options_dashboard_callback',
 		0
@@ -1190,7 +1320,7 @@ add_action( 'admin_menu', 'bop_add_site_options_dashboard', 999 );
  * @since 1.1.0
  */
 function bop_site_options_dashboard_callback() {
-	if ( ! current_user_can( 'edit_posts' ) ) {
+	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( 'You do not have sufficient permissions to access this page.' );
 	}
 	?>
@@ -1207,10 +1337,10 @@ function bop_site_options_dashboard_callback() {
 						<span class="dashicons dashicons-menu" style="font-size: 24px; vertical-align: middle; margin-right: 8px;"></span>
 						Nav Menu
 					</h2>
-					<p>Configure navigation menus, mega menu structure, and other site-wide settings.</p>
+					<p>Manage site-wide settings, navigation menus, and configuration options.</p>
 					<p>
 						<a href="<?php echo esc_url( admin_url( 'admin.php?page=acf-options-site-options' ) ); ?>" class="button button-primary">
-							Manage Nav Menu
+							Nav Menu
 						</a>
 					</p>
 				</div>
@@ -1731,3 +1861,202 @@ class BOP_Footer_Menu_Walker extends Walker_Nav_Menu {
 	}
 }
 
+
+
+/**
+ * Display all winners from all categories
+ * 
+ * Queries all posts with winner data and displays them grouped by category,
+ * with places (1st, 2nd, 3rd, HM) shown within each category.
+ *
+ * @return string HTML output of all winners
+ */
+function bop_display_all_winners() {
+	// Get all post types that might have winners
+	$winner_post_types = array( 'award', 'stillphotojournalism', 'pictureediting', 'videoediting', 'videophotojournalism' );
+	
+	// Query all posts with winner data
+	$winners_query = new WP_Query( array(
+		'post_type'      => $winner_post_types,
+		'posts_per_page' => -1,
+		'post_status'    => 'publish',
+		'meta_query'     => array(
+			array(
+				'key'     => 'winning_images',
+				'compare' => 'EXISTS',
+			),
+		),
+	) );
+	
+	// Organize winners by category
+	$winners_by_category = array();
+	
+	if ( $winners_query->have_posts() ) {
+		while ( $winners_query->have_posts() ) {
+			$winners_query->the_post();
+			$post_id = get_the_ID();
+			$category_name = get_the_title();
+			$category_link = get_permalink();
+			$category_featured_image = get_the_post_thumbnail_url( $post_id, 'full' );
+			
+			// Initialize category array
+			if ( ! isset( $winners_by_category[ $category_name ] ) ) {
+				$winners_by_category[ $category_name ] = array(
+					'category_link' => $category_link,
+					'category_featured_image' => $category_featured_image,
+					'1st' => array(),
+					'2nd' => array(),
+					'3rd' => array(),
+					'HM'  => array(),
+				);
+			}
+			
+			// Get winning images group
+			if ( have_rows( 'winning_images', $post_id ) ) {
+				while ( have_rows( 'winning_images', $post_id ) ) {
+					the_row();
+					
+					// First Place
+					if ( have_rows( 'first_place_group', $post_id ) ) {
+						while ( have_rows( 'first_place_group', $post_id ) ) {
+							the_row();
+							$winners_by_category[ $category_name ]['1st'][] = array(
+								'first_name'    => get_sub_field( 'first_name' ),
+								'last_name'     => get_sub_field( 'last_name' ),
+								'entry_name'    => get_sub_field( 'entry_name' ),
+								'publication'   => get_sub_field( 'publication' ),
+								'place'         => get_sub_field( 'place' ) ?: '1st',
+								'image'         => get_sub_field( 'image' ),
+								'entry_link'    => get_sub_field( 'link_to_winning_entry' ),
+							);
+						}
+					}
+					
+					// Second Place
+					if ( have_rows( 'second_place_group', $post_id ) ) {
+						while ( have_rows( 'second_place_group', $post_id ) ) {
+							the_row();
+							$winners_by_category[ $category_name ]['2nd'][] = array(
+								'first_name'    => get_sub_field( 'first_name' ),
+								'last_name'     => get_sub_field( 'last_name' ),
+								'entry_name'    => get_sub_field( 'entry_name' ),
+								'publication'   => get_sub_field( 'publication' ),
+								'place'         => get_sub_field( 'place' ) ?: '2nd',
+								'entry_link'    => get_sub_field( 'link_to_winning_entry' ),
+							);
+						}
+					}
+					
+					// Third Place
+					if ( have_rows( 'third_place_group', $post_id ) ) {
+						while ( have_rows( 'third_place_group', $post_id ) ) {
+							the_row();
+							$winners_by_category[ $category_name ]['3rd'][] = array(
+								'first_name'    => get_sub_field( 'first_name' ),
+								'last_name'     => get_sub_field( 'last_name' ),
+								'entry_name'    => get_sub_field( 'entry_name' ),
+								'publication'   => get_sub_field( 'publication' ),
+								'place'         => get_sub_field( 'place' ) ?: '3rd',
+								'entry_link'    => get_sub_field( 'link_to_winning_entry' ),
+							);
+						}
+					}
+					
+					// Honorable Mentions (HM)
+					$hm_groups = array( 'hm_one_place_group', 'hm_two_place_group', 'hm_three_place_group', 'hm_four_place_group', 'hm_five_place_group' );
+					foreach ( $hm_groups as $hm_group ) {
+						if ( have_rows( $hm_group, $post_id ) ) {
+							while ( have_rows( $hm_group, $post_id ) ) {
+								the_row();
+								$winners_by_category[ $category_name ]['HM'][] = array(
+									'first_name'    => get_sub_field( 'first_name' ),
+									'last_name'     => get_sub_field( 'last_name' ),
+									'entry_name'    => get_sub_field( 'entry_name' ),
+									'publication'   => get_sub_field( 'publication' ),
+									'place'         => get_sub_field( 'place' ) ?: 'HM',
+									'entry_link'    => get_sub_field( 'link_to_winning_entry' ),
+								);
+							}
+						}
+					}
+				}
+			}
+		}
+		wp_reset_postdata();
+	}
+	
+	// Display winners organized by category
+	ob_start();
+	?>
+	<div class="winners-display">
+		<?php foreach ( $winners_by_category as $category_name => $category_data ) : ?>
+			<section class="winners-category-section">
+				<?php if ( ! empty( $category_data['category_featured_image'] ) ) : ?>
+					<div class="category-featured-image">
+						<img src="<?php echo esc_url( $category_data['category_featured_image'] ); ?>" alt="<?php echo esc_attr( $category_name ); ?>" />
+					</div>
+				<?php endif; ?>
+				<h2 class="winners-category-heading">
+					<a href="<?php echo esc_url( $category_data['category_link'] ); ?>">
+						<?php echo esc_html( $category_name ); ?>
+					</a>
+				</h2>
+				
+				<?php foreach ( array( '1st', '2nd', '3rd', 'HM' ) as $place ) : ?>
+					<?php if ( ! empty( $category_data[ $place ] ) ) : ?>
+						<div class="winners-place-group">
+							<h3 class="winners-place-heading"><?php echo esc_html( $place ); ?> Place</h3>
+							<div class="winners-list">
+								<?php foreach ( $category_data[ $place ] as $winner ) : ?>
+									<div class="winner-item">
+										<div class="winner-details">
+											<div class="winner-name">
+												<?php if ( ! empty( $winner['entry_link'] ) ) : ?>
+													<?php 
+													$entry_post = is_array( $winner['entry_link'] ) ? $winner['entry_link'][0] : $winner['entry_link'];
+													if ( is_object( $entry_post ) ) :
+													?>
+														<a href="<?php echo esc_url( get_permalink( $entry_post->ID ) ); ?>">
+															<?php echo esc_html( $winner['first_name'] . ' ' . $winner['last_name'] ); ?>
+														</a>
+													<?php else : ?>
+														<?php echo esc_html( $winner['first_name'] . ' ' . $winner['last_name'] ); ?>
+													<?php endif; ?>
+												<?php else : ?>
+													<?php echo esc_html( $winner['first_name'] . ' ' . $winner['last_name'] ); ?>
+												<?php endif; ?>
+												<?php if ( ! empty( $winner['publication'] ) ) : ?>
+													<span class="winner-publication"> / <?php echo esc_html( $winner['publication'] ); ?></span>
+												<?php endif; ?>
+											</div>
+											<?php if ( ! empty( $winner['entry_name'] ) ) : ?>
+												<div class="winner-entry">
+													<?php if ( ! empty( $winner['entry_link'] ) ) : ?>
+														<?php 
+														$entry_post = is_array( $winner['entry_link'] ) ? $winner['entry_link'][0] : $winner['entry_link'];
+														if ( is_object( $entry_post ) ) :
+														?>
+															<a href="<?php echo esc_url( get_permalink( $entry_post->ID ) ); ?>">
+																<?php echo esc_html( $winner['entry_name'] ); ?>
+															</a>
+														<?php else : ?>
+															<?php echo esc_html( $winner['entry_name'] ); ?>
+														<?php endif; ?>
+													<?php else : ?>
+														<?php echo esc_html( $winner['entry_name'] ); ?>
+													<?php endif; ?>
+												</div>
+											<?php endif; ?>
+										</div>
+									</div>
+								<?php endforeach; ?>
+							</div>
+						</div>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			</section>
+		<?php endforeach; ?>
+	</div>
+	<?php
+	return ob_get_clean();
+}

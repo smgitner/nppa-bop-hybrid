@@ -868,7 +868,8 @@
                             },
                             "hide_admin": 0,
                             "placement": "top",
-                            "endpoint": 0
+                            "endpoint": 0,
+                            "selected": 0
                         },
                         {
                             "key": "field_5fcd0364f1f26",
@@ -951,7 +952,8 @@
                             },
                             "hide_admin": 0,
                             "placement": "top",
-                            "endpoint": 0
+                            "endpoint": 0,
+                            "selected": 0
                         },
                         {
                             "key": "field_5fcd0364f1f4a",
@@ -1043,7 +1045,8 @@
                                 "id": ""
                             },
                             "placement": "top",
-                            "endpoint": 0
+                            "endpoint": 0,
+                            "selected": 0
                         },
                         {
                             "key": "field_5fcd0364f1f6e",
@@ -1125,7 +1128,8 @@
                                 "id": ""
                             },
                             "placement": "top",
-                            "endpoint": 0
+                            "endpoint": 0,
+                            "selected": 0
                         },
                         {
                             "key": "field_5fcd0364f1f91",
@@ -1226,8 +1230,9 @@
         "format",
         "send-trackbacks"
     ],
-    "active": true,
+    "active": false,
     "description": "- This ACF Group is required for all story content stripes on a post or a page, this is the newly rebuild fieldset with closed divs on flexible fields.",
     "show_in_rest": 0,
-    "modified": 1671468379
+    "display_title": "",
+    "modified": 1764995907
 }
